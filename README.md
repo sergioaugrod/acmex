@@ -1,11 +1,11 @@
 # Acmex
 
-**TODO: Add description**
+Amcex is a Elixir Client for Lets Encrypt [ACMEv2](https://github.com/ietf-wg-acme/acme) protocol.
+*The library is under development, so its use in production is not recommended.*
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `acmex` to your list of dependencies in `mix.exs`:
+The package can be installed by adding `acmex` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
@@ -15,6 +15,37 @@ def deps do
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/acmex](https://hexdocs.pm/acmex).
+## Configure
+
+Set the `directory_url` in your `config.exs`:
+
+```elixir
+config :acmex,
+  directory_url: "https://acme-v02.api.letsencrypt.org/directory"
+```
+
+If you need a staging version of `Lets Encrypt ACMEv2` set `directory_url` as https://acme-staging-v02.api.letsencrypt.org/directory.
+
+## Usage
+
+## Development
+
+### Running Tests locally
+
+You need an ACME test server, we recommend [pebble](https://github.com/letsencrypt/pebble):
+
+```bash
+$ docker run -e "PEBBLE_VA_NOSLEEP=1" -e "PEBBLE_VA_ALWAYS_VALID=1" -e "PEBBLE_WFE_NONCEREJECT=0" -p 14000:14000 letsencrypt/pebble:2018-09-28
+```
+
+After execute the ACME test server, run the tests:
+
+```bash
+$ mix test
+```
+
+### Running Tests in Docker
+
+```bash
+docker-compose run test
+```

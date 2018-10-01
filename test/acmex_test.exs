@@ -13,14 +13,13 @@ defmodule AcmexTest do
     test "creates a new account" do
       {:ok, account} = Acmex.new_account(["mailto:info@example.com"], true)
 
-      assert account == %Account{
+      assert %Account{
                agreement: nil,
                contact: ["mailto:info@example.com"],
                created_at: nil,
                id: nil,
-               status: "valid",
-               url: "https://localhost:14000/my-account/1"
-             }
+               status: "valid"
+             } = account
     end
   end
 
@@ -28,14 +27,13 @@ defmodule AcmexTest do
     test "returns current account" do
       {:ok, account} = Acmex.get_account()
 
-      assert account == %Account{
+      assert %Account{
                agreement: nil,
                contact: ["mailto:info@example.com"],
                created_at: nil,
                id: nil,
-               status: "valid",
-               url: "https://localhost:14000/my-account/1"
-             }
+               status: "valid"
+             } = account
     end
   end
 

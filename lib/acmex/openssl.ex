@@ -16,9 +16,9 @@ defmodule Acmex.OpenSSL do
     end
   end
 
-  def generate_csr(key_path, subject),
-    do:
-      openssl(~w(req -new -nodes -key #{key_path} -subj #{format_subject(subject)} -outform DER))
+  def generate_csr(key_path, subject) do
+    openssl(~w(req -new -nodes -key #{key_path} -subj #{format_subject(subject)} -outform DER))
+  end
 
   defp openssl(args) do
     case System.cmd("openssl", args, stderr_to_stdout: true) do
