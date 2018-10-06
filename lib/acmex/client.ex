@@ -42,11 +42,17 @@ defmodule Acmex.Client do
     with {:ok, %{url: kid}} <- get_account(state.account, state.directory, state.jwk),
          {:ok, nonce} <- get_nonce(state.directory),
          {:ok, resp} <- Request.post(state.directory.new_order, state.jwk, payload, nonce, kid) do
-      {:reply, {:ok, Order.new(resp.body)}, state}
+      {:reply, {:ok, Order.new(resp.body, resp.headers)}, state}
     else
       error -> {:reply, error, state}
     end
   end
+
+  def handle_call({:get_order, url}, _from, state),
+    do: {:reply, Order.reload(%Order{url: url}), state}
+
+  def handle_call({:get_challenge, url}, _from, state),
+    do: {:reply, Challenge.reload(%Challenge{url: url}), state}
 
   def handle_call({:get_challenge_response, challenge}, _from, %{jwk: jwk} = state),
     do: {:reply, Challenge.get_response(challenge, jwk), state}
@@ -69,14 +75,14 @@ defmodule Acmex.Client do
     with {:ok, %{url: kid}} <- get_account(state.account, state.directory, state.jwk),
          {:ok, nonce} <- get_nonce(state.directory),
          {:ok, resp} <- Request.post(order.finalize, state.jwk, payload, nonce, kid) do
-      {:reply, {:ok, Order.new(resp.body)}, order, state}
+      {:reply, {:ok, Order.new(resp.body, resp.headers)}, state}
     else
       error -> {:reply, error, state}
     end
   end
 
   def handle_call({:get_certificate, order}, _from, state) do
-    case Request.get(order.certificate, [{"Accept", "application/pem-certificate-chain"}]) do
+    case Request.get(order.certificate, [{"Accept", "application/pem-certificate-chain"}], nil) do
       {:ok, resp} -> {:reply, {:ok, resp.body}, state}
       error -> {:reply, error, state}
     end

@@ -4,10 +4,17 @@ defmodule Acmex.MixProject do
   def project do
     [
       app: :acmex,
-      version: "0.1.0",
+      deps: deps(),
       elixir: "~> 1.6",
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test
+      ],
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      version: "0.1.0"
     ]
   end
 
@@ -22,6 +29,7 @@ defmodule Acmex.MixProject do
   defp deps do
     [
       {:credo, "~> 0.10.0", only: [:dev, :test], runtime: false},
+      {:excoveralls, "~> 0.10", only: :test},
       {:httpoison, "~> 1.0"},
       {:jose, "~> 1.8"},
       {:poison, "~> 3.1"}

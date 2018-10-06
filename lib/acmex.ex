@@ -9,6 +9,10 @@ defmodule Acmex do
 
   def new_order(identifiers), do: GenServer.call(Client, {:new_order, identifiers})
 
+  def get_order(url), do: GenServer.call(Client, {:get_order, url})
+
+  def get_challenge(url), do: GenServer.call(Client, {:get_challenge, url})
+
   def get_challenge_response(challenge),
     do: GenServer.call(Client, {:get_challenge_response, challenge})
 

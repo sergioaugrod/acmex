@@ -1,7 +1,14 @@
 defmodule AcmexTest do
   use ExUnit.Case, async: true
 
-  alias Acmex.Resource.{Account, Authorization}
+  alias Acmex.Resource.{Account, Authorization, Order}
+
+  defp poll_order_status(order) do
+    case Order.reload(order) do
+      {:ok, %{status: "valid"} = order} -> order
+      {:ok, order} -> poll_order_status(order)
+    end
+  end
 
   setup_all do
     Acmex.start_link("test/support/fixture/account.key")
@@ -46,22 +53,57 @@ defmodule AcmexTest do
     end
   end
 
-  describe "Acmex.get_challenge_response/1" do
-    test "returns the challenge authorization key" do
+  describe "Acmex.get_order/1" do
+    setup do
+      {:ok, order} = Acmex.new_order(["example.com"])
+
+      [order: order]
+    end
+
+    test "returns the order of url", %{order: order} do
+      {:ok, order} = Acmex.get_order(order.url)
+
+      assert order.status == "pending"
+    end
+  end
+
+  describe "Acmex.get_challenge/1" do
+    setup do
       {:ok, order} = Acmex.new_order(["example.com"])
       authorization = List.first(order.authorizations)
-      challenge = Authorization.http(authorization)
 
+      [challenge: Authorization.http(authorization)]
+    end
+
+    test "returns the challenge of url", %{challenge: challenge} do
+      {:ok, challenge} = Acmex.get_challenge(challenge.url)
+
+      assert challenge.status == "pending"
+    end
+  end
+
+  describe "Acmex.get_challenge_response/1" do
+    setup do
+      {:ok, order} = Acmex.new_order(["example.com"])
+      authorization = List.first(order.authorizations)
+
+      [challenge: Authorization.http(authorization)]
+    end
+
+    test "returns the challenge authorization key", %{challenge: challenge} do
       assert String.length(Acmex.get_challenge_response(challenge)) == 87
     end
   end
 
   describe "Acmex.validate_challenge/1" do
-    test "validates a challenge" do
+    setup do
       {:ok, order} = Acmex.new_order(["example.com"])
       authorization = List.first(order.authorizations)
-      challenge = Authorization.http(authorization)
 
+      [challenge: Authorization.http(authorization)]
+    end
+
+    test "validates a challenge", %{challenge: challenge} do
       {:ok, challenge} = Acmex.validate_challenge(challenge)
 
       assert challenge.status == "pending"
@@ -72,8 +114,39 @@ defmodule AcmexTest do
   end
 
   describe "Acmex.finalize_order/2" do
+    setup do
+      {:ok, order} = Acmex.new_order(["example.com"])
+      authorization = List.first(order.authorizations)
+      challenge = Authorization.http(authorization)
+      Acmex.validate_challenge(challenge)
+
+      [csr: File.read!("test/support/fixture/order.csr"), order: order]
+    end
+
+    test "finalizes an order", %{csr: csr, order: order} do
+      {:ok, order} = Acmex.finalize_order(order, csr)
+
+      assert order.finalize
+      assert order.status == "processing"
+    end
   end
 
   describe "Acmex.get_certificate/1" do
+    setup do
+      {:ok, order} = Acmex.new_order(["example.com"])
+      authorization = List.first(order.authorizations)
+      challenge = Authorization.http(authorization)
+      Acmex.validate_challenge(challenge)
+      csr = File.read!("test/support/fixture/order.csr")
+      Acmex.finalize_order(order, csr)
+      order = poll_order_status(order)
+
+      [order: order]
+    end
+
+    test "returns the certificate", %{order: order} do
+      {:ok, certificate} = Acmex.get_certificate(order)
+      assert certificate =~ "BEGIN CERTIFICATE"
+    end
   end
 end

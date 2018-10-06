@@ -9,7 +9,7 @@ defmodule Acmex.Resource.Authorization do
   ]
 
   def new(%{challenges: challenges} = authorization) do
-    challenges = Enum.map(challenges, &struct(Challenge, &1))
+    challenges = Enum.map(challenges, &Challenge.new(&1))
     authorization = %{authorization | challenges: challenges}
 
     struct(__MODULE__, authorization)

@@ -1,7 +1,6 @@
 # Acmex
 
 Amcex is a Elixir Client for Lets Encrypt [ACMEv2](https://github.com/ietf-wg-acme/acme) protocol.
-*The library is under development, so its use in production is not recommended.*
 
 ## Installation
 

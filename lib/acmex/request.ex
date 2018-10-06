@@ -5,10 +5,9 @@ defmodule Acmex.Request do
   @user_agent "Acmex v#{Mix.Project.config()[:version]} (#{@repo_url})"
   @default_headers [{"User-Agent", @user_agent}, {"Content-Type", "application/jose+json"}]
 
-  def get(url, headers \\ []) do
-    url
-    |> HTTPoison.get(@default_headers ++ headers, hackney: hackney_opts())
-    |> handle_response(:decode)
+  def get(url, headers \\ [], handler \\ :decode) do
+    resp = HTTPoison.get(url, @default_headers ++ headers, hackney: hackney_opts())
+    if handler, do: handle_response(resp, handler), else: handle_response(resp)
   end
 
   def post(url, jwk, payload, nonce, kid \\ nil) do
@@ -44,6 +43,7 @@ defmodule Acmex.Request do
 
   defp handle_response(result) do
     case result do
+      {:ok, %{status_code: 200} = resp} -> {:ok, resp}
       {:ok, %{status_code: 204} = resp} -> {:ok, resp}
       {:ok, resp} -> {:error, resp}
       {:error, error} -> {:error, error}
