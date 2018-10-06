@@ -5,11 +5,14 @@ defmodule Acmex.Request do
   @user_agent "Acmex v#{Mix.Project.config()[:version]} (#{@repo_url})"
   @default_headers [{"User-Agent", @user_agent}, {"Content-Type", "application/jose+json"}]
 
+  @spec get(String.t(), List.t(), any()) :: {:ok, Map.t()} | {:error, Map.t()}
   def get(url, headers \\ [], handler \\ :decode) do
     resp = HTTPoison.get(url, @default_headers ++ headers, hackney: hackney_opts())
     if handler, do: handle_response(resp, handler), else: handle_response(resp)
   end
 
+  @spec post(String.t(), Map.t(), Map.t(), String.t(), String.t()) ::
+          {:ok, Map.t()} | {:error, Map.t()}
   def post(url, jwk, payload, nonce, kid \\ nil) do
     jws = Crypto.sign(jwk, Poison.encode!(payload), jws_headers(url, nonce, kid))
 
@@ -18,12 +21,14 @@ defmodule Acmex.Request do
     |> handle_response(:decode)
   end
 
+  @spec head(String.t()) :: {:ok, Map.t()} | {:error, Map.t()}
   def head(url) do
     url
     |> HTTPoison.head([], hackney: hackney_opts())
     |> handle_response()
   end
 
+  @spec get_header(List.t(), String.t()) :: nil | String.t()
   def get_header(headers, key) do
     case List.keyfind(headers, key, 0) do
       nil -> nil

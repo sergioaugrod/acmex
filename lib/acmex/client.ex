@@ -63,7 +63,7 @@ defmodule Acmex.Client do
     with {:ok, %{url: kid}} <- get_account(state.account, state.directory, state.jwk),
          {:ok, nonce} <- get_nonce(state.directory),
          {:ok, resp} <- Request.post(challenge.url, state.jwk, payload, nonce, kid) do
-      {:reply, {:ok, resp.body}, state}
+      {:reply, {:ok, Challenge.new(resp.body)}, state}
     else
       error -> {:reply, error, state}
     end
