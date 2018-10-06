@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  pebble:
+    image: letsencrypt/pebble:2018-09-28
+    environment:
+      - PEBBLE_VA_NOSLEEP=1
+      - PEBBLE_VA_ALWAYS_VALID=1
+      - PEBBLE_WFE_NONCEREJECT=0
+    ports:
+      - '14000:14000'
+
+  test:
+    build: .
+    volumes:
+      - .:/acmex
+    command: mix do deps.get, test
+    depends_on:
+      - pebble
+    environment:
+      - MIX_ENV=test
+      - ACMEX_DIRECTORY_URL=https://pebble:14000/dir
