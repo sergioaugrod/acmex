@@ -10,12 +10,6 @@ defmodule AcmexTest do
     end
   end
 
-  setup_all do
-    Acmex.start_link("test/support/fixture/account.key")
-    Acmex.new_account(["mailto:info@example.com"], true)
-    :ok
-  end
-
   describe "Acmex.new_account/2" do
     test "creates a new account" do
       {:ok, account} = Acmex.new_account(["mailto:info@example.com"], true)
