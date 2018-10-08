@@ -9,7 +9,7 @@ defmodule Acmex.Resource.AccountTest do
         agreement: nil,
         contact: ["mailto:info@example.com"],
         created_at: nil,
-        id: 313120931,
+        id: 313_120_931,
         status: "valid"
       }
 

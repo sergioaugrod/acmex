@@ -11,7 +11,7 @@ The package can be installed by adding `acmex` to your list of dependencies in `
 ```elixir
 def deps do
   [
-    {:acmex, "~> 0.1.0"}
+    {:acmex, github: "sergioaugrod/acmex"}
   ]
 end
 ```
