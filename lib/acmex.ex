@@ -2,8 +2,9 @@ defmodule Acmex do
   alias Acmex.Client
   alias Acmex.Resource.{Account, Challenge, Order}
 
-  @spec start_link(String.t()) :: {:ok, pid()} | {:error, Tuple.t()}
-  def start_link(keyfile), do: GenServer.start_link(Client, [keyfile: keyfile], name: Client)
+  @spec start_link(String.t(), Atom.t()) :: {:ok, pid()} | {:error, Tuple.t()}
+  def start_link(keyfile, name \\ Client),
+    do: GenServer.start_link(Client, [keyfile: keyfile], name: name)
 
   @spec new_account(List.t(), Boolean.t()) :: {:ok, Account.t()} | {:error, any()}
   def new_account(contact, tos), do: GenServer.call(Client, {:new_account, contact, tos})

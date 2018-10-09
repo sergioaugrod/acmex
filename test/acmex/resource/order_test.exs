@@ -27,5 +27,12 @@ defmodule Acmex.Resource.OrderTest do
 
       assert order.status == "pending"
     end
+
+    test "returns error because order url is invalid", %{order: order} do
+      directory_url = Application.get_env(:acmex, :directory_url)
+      order = %{order | url: "#{directory_url}/my-order/mGxR5"}
+
+      assert {:error, _} = Order.reload(order)
+    end
   end
 end
