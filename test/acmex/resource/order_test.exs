@@ -1,8 +1,8 @@
 defmodule Acmex.Resource.OrderTest do
   use ExUnit.Case, async: true
 
-  alias Acmex.Resource.Order
   alias Acmex.Request
+  alias Acmex.Resource.Order
 
   setup_all do
     {:ok, order} = Acmex.new_order(["example.com"])
