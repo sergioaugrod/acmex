@@ -11,7 +11,7 @@ The package can be installed by adding `acmex` to your list of dependencies in `
 ```elixir
 def deps do
   [
-    {:acmex, "~> 0.1.0"}
+    {:acmex, github: "sergioaugrod/acmex"}
   ]
 end
 ```
@@ -81,7 +81,7 @@ Acmex.get_order(order.url)
 ```elixir
 {:ok, order} = Acmex.new_order(["example.com"])
 authorization = List.first(order.authorizations)
-challenge = Authorization.http(authorization)
+challenge = Acmex.Resource.Authorization.http(authorization)
 ```
 
 #### Return a challenge response
@@ -96,11 +96,19 @@ Acmex.get_challenge_response(challenge)
 {:ok, challenge} = Acmex.validate_challenge(challenge)
 ```
 
+#### Fetch an existing challenge
+
+```elixir
+Acmex.get_challenge(challenge.url)
+```
+
 ### Certificate
 
 #### Finalize an order
 
 ```elixir
+Acmex.OpenSSL.generate_key(:rsa, "/path/order.key")
+{:ok, csr} = Acmex.OpenSSL.generate_csr("/path/order.key", %{common_name: "saugrod.tk"})
 {:ok, order} = Acmex.finalize_order(order, csr)
 ```
 
@@ -115,7 +123,7 @@ Acmex.get_certificate(order)
 To run the tests you need an `ACME Test Server`. You can use [Pebble](https://github.com/letsencrypt/pebble):
 
 ```bash
-$ docker run -e "PEBBLE_VA_NOSLEEP=1" -e "PEBBLE_VA_ALWAYS_VALID=1" -e "PEBBLE_WFE_NONCEREJECT=0" -p 14000:14000 letsencrypt/pebble:2018-09-28
+$ docker -d run -e "PEBBLE_VA_NOSLEEP=1" -e "PEBBLE_VA_ALWAYS_VALID=1" -e "PEBBLE_WFE_NONCEREJECT=0" -p 14000:14000 letsencrypt/pebble:2018-09-28
 $ mix test
 ```
 

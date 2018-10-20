@@ -1,7 +1,8 @@
 defmodule Acmex do
   alias Acmex.Client
 
-  def start_link(keyfile), do: GenServer.start_link(Client, [keyfile: keyfile], name: Client)
+  def start_link(keyfile, name \\ Client),
+    do: GenServer.start_link(Client, [keyfile: keyfile], name: name)
 
   def new_account(contact, tos), do: GenServer.call(Client, {:new_account, contact, tos})
 

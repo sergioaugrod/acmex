@@ -10,10 +10,17 @@ defmodule AcmexTest do
     end
   end
 
-  setup_all do
-    Acmex.start_link("test/support/fixture/account.key")
-    Acmex.new_account(["mailto:info@example.com"], true)
-    :ok
+  describe "Acmex.start_link/1" do
+    test "returns ok" do
+      assert {:ok, _} = Acmex.start_link("test/support/fixture/account.key", :acmex_test)
+    end
+
+    test "returns error" do
+      Process.flag(:trap_exit, true)
+      result = Acmex.start_link("test/support/fixture/account2.key", :acmex_test)
+
+      assert result == {:error, "keyfile test/support/fixture/account2.key does not exists"}
+    end
   end
 
   describe "Acmex.new_account/2" do

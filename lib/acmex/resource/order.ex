@@ -17,7 +17,7 @@ defmodule Acmex.Resource.Order do
 
     url =
       case Request.get_header(headers, "Location") do
-        nil -> order.url
+        nil -> order[:url]
         location -> location
       end
 
