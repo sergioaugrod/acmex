@@ -1,4 +1,4 @@
-# Acmex
+# Acmex [![Build Status](https://travis-ci.org/sergioaugrod/acmex.svg?branch=master)](https://travis-ci.org/sergioaugrod/acmex)
 
 Acmex is an Elixir Client for the Lets Encrypt [ACMEv2](https://github.com/ietf-wg-acme/acme) protocol.
 

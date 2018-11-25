@@ -13,7 +13,7 @@ defmodule Acmex.Resource.DirectoryTest do
     end
 
     test "returns error" do
-      {:error, reason} = Directory.new("https://localhost:14000/invalid")
+      {:error, reason} = Directory.new("#{Config.directory_url()}/invalid")
 
       assert reason.status_code == 404
     end

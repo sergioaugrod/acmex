@@ -1,37 +1,43 @@
 defmodule Acmex.RequestTest do
   use ExUnit.Case, async: true
 
-  alias Acmex.Crypto
-  alias Acmex.Request
+  alias Acmex.{Config, Crypto, Request}
+  alias Acmex.Resource.Directory
+
+  setup_all do
+    [directory: elem(Directory.new(), 1), directory_url: Config.directory_url()]
+  end
 
   describe "Request.get/3" do
-    test "returns response" do
-      {:ok, response} = Request.get("https://localhost:14000/dir", [], nil)
+    test "returns response", %{directory_url: directory_url} do
+      {:ok, response} = Request.get(directory_url, [], nil)
 
       assert is_binary(response.body)
     end
 
-    test "returns response with encoded body" do
-      {:ok, response} = Request.get("https://localhost:14000/dir", [])
+    test "returns response with encoded body", %{
+      directory: directory,
+      directory_url: directory_url
+    } do
+      {:ok, response} = Request.get(directory_url, [])
 
-      assert response.body.newAccount == "https://localhost:14000/sign-me-up"
+      assert response.body.newAccount == directory.new_account
     end
   end
 
   describe "Request.post/5" do
-    setup do
-      {:ok, response} = Request.head("https://localhost:14000/nonce-plz")
+    setup %{directory: directory} do
+      {:ok, response} = Request.head(directory.new_nonce)
       nonce = Request.get_header(response.headers, "Replay-Nonce")
       jwk = Crypto.get_jwk("test/support/fixture/account.key")
 
-      [jwk: jwk, nonce: nonce]
+      [directory: directory, jwk: jwk, nonce: nonce]
     end
 
-    test "returns response", %{jwk: jwk, nonce: nonce} do
-      url = "https://localhost:14000/sign-me-up"
+    test "returns response", %{directory: directory, jwk: jwk, nonce: nonce} do
       payload = %{contact: ["mailto:info@example.com"], termsOfServiceAgreed: true}
 
-      {:ok, response} = Request.post(url, jwk, payload, nonce)
+      {:ok, response} = Request.post(directory.new_account, jwk, payload, nonce)
 
       assert response.status_code == 200
       assert response.body.status == "valid"
@@ -40,8 +46,8 @@ defmodule Acmex.RequestTest do
   end
 
   describe "Request.head/1" do
-    test "returns nonce response" do
-      {:ok, response} = Request.head("https://localhost:14000/nonce-plz")
+    test "returns nonce response", %{directory: directory} do
+      {:ok, response} = Request.head(directory.new_nonce)
 
       assert response.body == ""
       assert response.status_code == 204
