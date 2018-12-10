@@ -1,4 +1,6 @@
 defmodule Acmex.Crypto do
+  @moduledoc false
+
   alias JOSE.{JWK, JWS}
 
   def get_jwk(keyfile) do

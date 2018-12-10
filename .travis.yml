@@ -1,0 +1,23 @@
+language: elixir
+
+services:
+  - docker
+
+stages:
+  - test
+  - quality
+
+elixir: 1.7
+otp_release: 21.1
+
+jobs:
+  include:
+    - stage: test
+      script: docker-compose run test
+      sudo: required
+
+    - stage: quality
+      script: mix format --check-formatted
+
+    - stage: quality
+      script: mix credo --strict

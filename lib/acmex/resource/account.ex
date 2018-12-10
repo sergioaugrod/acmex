@@ -1,4 +1,8 @@
 defmodule Acmex.Resource.Account do
+  @moduledoc """
+  This structure represents information about an account.
+  """
+
   defstruct [
     :agreement,
     :contact,

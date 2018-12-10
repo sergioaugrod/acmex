@@ -45,14 +45,20 @@ defmodule Acmex.Resource.ChallengeTest do
   describe "Challenge.get_response/2" do
     test "returns challenge response", %{challenge: challenge} do
       jwk = Crypto.get_jwk("test/support/fixture/account.key")
-      assert String.length(Challenge.get_response(challenge, jwk)) == 87
+
+      {:ok, response} = Challenge.get_response(challenge, jwk)
+
+      assert String.length(response) == 87
     end
   end
 
   describe "Challenge.get_key_authorization/2" do
     test "returns challenge key authorization", %{challenge: challenge} do
       jwk = Crypto.get_jwk("test/support/fixture/account.key")
-      assert String.length(Challenge.get_key_authorization(challenge, jwk)) == 87
+
+      {:ok, authorization} = Challenge.get_key_authorization(challenge, jwk)
+
+      assert String.length(authorization) == 87
     end
   end
 end

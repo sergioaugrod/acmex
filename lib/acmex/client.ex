@@ -1,4 +1,6 @@
 defmodule Acmex.Client do
+  @moduledoc false
+
   use GenServer
 
   alias Acmex.{Crypto, Request}
@@ -58,7 +60,8 @@ defmodule Acmex.Client do
     do: {:reply, Challenge.get_response(challenge, jwk), state}
 
   def handle_call({:validate_challenge, challenge}, _from, state) do
-    payload = %{key_authorization: Challenge.get_key_authorization(challenge, state.jwk)}
+    {:ok, key_authorization} = Challenge.get_key_authorization(challenge, state.jwk)
+    payload = %{key_authorization: key_authorization}
 
     with {:ok, %{url: kid}} <- get_account(state.account, state.directory, state.jwk),
          {:ok, nonce} <- get_nonce(state.directory),

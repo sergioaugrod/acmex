@@ -1,4 +1,6 @@
 defmodule Acmex.Request do
+  @moduledoc false
+
   alias Acmex.Crypto
 
   @repo_url "https://www.github.com/sergioaugrod/acmex"
