@@ -3,21 +3,18 @@ defmodule Acmex.Crypto do
 
   alias JOSE.{JWK, JWS}
 
-  @doc false
   def get_jwk(keyfile) do
     keyfile
     |> JWK.from_pem_file()
     |> JWK.to_map()
   end
 
-  @doc false
   def sign(jwk, payload, %{"kid" => _kid} = header) do
     jwk
     |> JWS.sign(payload, Map.put(header, "alg", "RS256"))
     |> elem(1)
   end
 
-  @doc false
   def sign(jwk, payload, header) do
     {_, public_jwk} = JWK.to_public_map(jwk)
 

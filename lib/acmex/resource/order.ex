@@ -1,4 +1,8 @@
 defmodule Acmex.Resource.Order do
+  @moduledoc """
+  This structure represents a client request for a certificate.
+  """
+
   alias Acmex.Request
   alias Acmex.Resource.Authorization
 

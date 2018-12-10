@@ -1,4 +1,8 @@
 defmodule Acmex.Resource.Authorization do
+  @moduledoc """
+  This structure represents an account authorization to act for an identifier.
+  """
+
   alias Acmex.Resource.Challenge
 
   defstruct [

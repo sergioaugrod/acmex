@@ -1,4 +1,6 @@
 defmodule Acmex.OpenSSL do
+  @moduledoc false
+
   @default_rsa_size 2048
   @subject_keys %{
     common_name: "CN",

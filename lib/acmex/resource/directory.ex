@@ -1,4 +1,8 @@
 defmodule Acmex.Resource.Directory do
+  @moduledoc """
+  This structure represents a directory.
+  """
+
   alias Acmex.{Config, Request}
 
   defstruct [

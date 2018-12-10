@@ -1,4 +1,8 @@
 defmodule Acmex.Resource.Challenge do
+  @moduledoc """
+  This structure represents a challenge to prove control of an identifier.
+  """
+
   alias Acmex.Request
   alias JOSE.JWK
 
@@ -22,5 +26,5 @@ defmodule Acmex.Resource.Challenge do
     do: get_key_authorization(challenge, jwk)
 
   def get_key_authorization(%__MODULE__{token: token}, jwk),
-    do: "#{token}.#{JWK.thumbprint(jwk)}"
+    do: {:ok, "#{token}.#{JWK.thumbprint(jwk)}"}
 end

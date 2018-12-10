@@ -1,7 +1,5 @@
 language: elixir
 
-sudo: required
-
 services:
   - docker
 
@@ -16,7 +14,10 @@ jobs:
   include:
     - stage: test
       script: docker-compose run test
+      sudo: required
 
     - stage: quality
       script: mix format --check-formatted
-      sudo: false
+
+    - stage: quality
+      script: mix credo --strict

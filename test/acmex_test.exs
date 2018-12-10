@@ -98,7 +98,9 @@ defmodule AcmexTest do
     end
 
     test "returns the challenge authorization key", %{challenge: challenge} do
-      assert String.length(Acmex.get_challenge_response(challenge)) == 87
+      {:ok, response} = Acmex.get_challenge_response(challenge)
+
+      assert String.length(response) == 87
     end
   end
 

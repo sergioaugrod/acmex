@@ -124,10 +124,10 @@ defmodule Acmex do
   ## Examples
 
       iex> Acmex.get_challenge_response(%Challenge{token: "LXk0qPoRi53T3nYAzB66IWpeWtaFQ4fGCp4IOiJY-Ms"})
-      "LXk0qPoRi53T3nYAzB66IWpeWtaFQ4fGCp4IOiJY-Ms.5zmJUVWaucybUNJSLeCaO9D_cauS5QiwA92KTiY_vNc"
+      {:ok, "LXk0qPoRi53T3nYAzB66IWpeWtaFQ4fGCp4IOiJY-Ms.5zmJUVWaucybUNJSLeCaO9D_cauS5QiwA92KTiY_vNc"}
 
   """
-  @spec get_challenge_response(Challenge.t()) :: binary()
+  @spec get_challenge_response(Challenge.t()) :: {:ok, binary()}
   def get_challenge_response(challenge),
     do: GenServer.call(Client, {:get_challenge_response, challenge})
 
