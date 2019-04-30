@@ -3,10 +3,24 @@ defmodule Acmex.Crypto do
 
   alias JOSE.{JWK, JWS}
 
-  def get_jwk(keyfile) do
-    keyfile
-    |> JWK.from_pem_file()
-    |> JWK.to_map()
+  def fetch_jwk_from_file(keyfile) do
+    try do
+      {:ok,
+       keyfile
+       |> JWK.from_pem_file()
+       |> JWK.to_map()}
+    rescue
+      _ -> {:error, :invalid_jwk}
+    end
+  end
+
+  def fetch_jwk(pem) do
+    try do
+      {%{kty: _}, jwk} = pem |> JOSE.JWK.from_pem() |> JOSE.JWK.to_map()
+      {:ok, jwk}
+    rescue
+      _ -> {:error, :invalid_jwk}
+    end
   end
 
   def sign(jwk, payload, %{"kid" => _kid} = header) do

@@ -6,18 +6,37 @@ defmodule Acmex.Client do
   alias Acmex.{Crypto, Request}
   alias Acmex.Resource.{Account, Challenge, Directory, Order}
 
-  def init(keyfile: keyfile) do
-    with true <- File.exists?(keyfile),
+  def init(opts \\ []) do
+    keyfile = Keyword.get(opts, :keyfile)
+    key = Keyword.get(opts, :key)
+
+    with {:ok, jwk} <-
+           (cond do
+              keyfile ->
+                if File.exists?(keyfile) do
+                  Crypto.fetch_jwk_from_file(keyfile)
+                else
+                  {:error, :keyfile_enoent}
+                end
+
+              key ->
+                Crypto.fetch_jwk(key)
+
+              true ->
+                {:error, :no_key_opt}
+            end),
          {:ok, directory} <- Directory.new() do
       state = %{
         directory: directory,
-        jwk: Crypto.get_jwk(keyfile),
+        jwk: jwk,
         account: nil
       }
 
       {:ok, state}
     else
-      false -> {:stop, "keyfile #{keyfile} does not exists"}
+      {:error, :no_key_opt} -> {:stop, "key or keyfile opt must be present"}
+      {:error, :keyfile_enoent} -> {:stop, "supplied keyfile #{keyfile} does not exists"}
+      {:error, :invalid_jwk} -> {:stop, "supplied key could not be parsed to JWK"}
       {:error, error} -> {:stop, error}
     end
   end

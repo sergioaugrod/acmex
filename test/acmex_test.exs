@@ -12,14 +12,18 @@ defmodule AcmexTest do
 
   describe "Acmex.start_link/1" do
     test "returns ok" do
-      assert {:ok, _} = Acmex.start_link("test/support/fixture/account.key", :acmex_test)
+      assert {:ok, _} = Acmex.start_link(keyfile: "test/support/fixture/account.key", name: :acmex_test)
+    end
+
+    test "returns ok via :key" do
+      assert {:ok, _} = Acmex.start_link(key: File.read!("test/support/fixture/account.key"), name: :acmex_key_test)
     end
 
     test "returns error" do
       Process.flag(:trap_exit, true)
-      result = Acmex.start_link("test/support/fixture/account2.key", :acmex_test)
+      result = Acmex.start_link(keyfile: "test/support/fixture/account2.key", name: :acmex_test)
 
-      assert result == {:error, "keyfile test/support/fixture/account2.key does not exists"}
+      assert result == {:error, "supplied keyfile test/support/fixture/account2.key does not exists"}
     end
   end
 

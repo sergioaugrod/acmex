@@ -29,7 +29,7 @@ defmodule Acmex.RequestTest do
     setup %{directory: directory} do
       {:ok, response} = Request.head(directory.new_nonce)
       nonce = Request.get_header(response.headers, "Replay-Nonce")
-      jwk = Crypto.get_jwk("test/support/fixture/account.key")
+      {:ok, jwk} = Crypto.fetch_jwk_from_file("test/support/fixture/account.key")
 
       [directory: directory, jwk: jwk, nonce: nonce]
     end

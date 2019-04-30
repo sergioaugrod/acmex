@@ -21,20 +21,23 @@ defmodule Acmex do
   ## Parameters
 
     - keyfile: The path to an RSA key.
+    - key: RSA key plaintext.
     - name: Optional name for the Client.
 
   ## Examples
 
-      iex> Acmex.start_link("test/support/fixture/account.key")
+      iex> Acmex.start_link(keyfile: "test/support/fixture/account.key")
       {:ok, #PID<...>}
 
-      iex> Acmex.start_link("test/support/fixture/account.key", :acmex_optional_name)
+      iex> Acmex.start_link(keyfile: "test/support/fixture/account.key", name: :acmex_optional_name)
       {:ok, #PID<...>}
 
   """
-  @spec start_link(binary(), atom()) :: on_start_link()
-  def start_link(keyfile, name \\ Client),
-    do: GenServer.start_link(Client, [keyfile: keyfile], name: name)
+  @spec start_link(keyword()) :: on_start_link()
+  def start_link(opts \\ []) do
+    {name, opts} = Keyword.pop(opts, :name, Client)
+    GenServer.start_link(Client, opts, name: name)
+  end
 
   @doc """
   Creates a new account.

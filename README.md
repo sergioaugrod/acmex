@@ -43,7 +43,9 @@ Acmex.OpenSSL.generate_key(:rsa, "/path/account.key")
 And now start the client with the generated key file:
 
 ```elixir
-Acmex.start_link("/path/account.key")
+Acmex.start_link(keyfile: "/path/account.key")
+# or with a plaintext key loaded from ENV or other...
+Acmex.start_link(key: "/path/account.key")
 ```
 
 ### Account
