@@ -13,11 +13,20 @@ defmodule Acmex.Request do
   end
 
   def post(url, jwk, payload, nonce, kid \\ nil) do
-    jws = Crypto.sign(jwk, Poison.encode!(payload), jws_headers(url, nonce, kid))
+    jws = Crypto.sign(jwk, Jason.encode!(payload), jws_headers(url, nonce, kid))
 
     url
-    |> HTTPoison.post(Poison.encode!(jws), @default_headers, hackney: hackney_opts())
+    |> HTTPoison.post(Jason.encode!(jws), @default_headers, hackney: hackney_opts())
     |> handle_response(:decode)
+  end
+
+  def post_as_get(url, jwk, nonce, kid \\ nil, headers \\ [], handler \\ :decode) do
+    jws = Crypto.sign(jwk, "", jws_headers(url, nonce, kid))
+
+    resp =
+      HTTPoison.post(url, Jason.encode!(jws), @default_headers ++ headers, hackney: hackney_opts())
+
+    if handler, do: handle_response(resp, handler), else: handle_response(resp)
   end
 
   def head(url) do
@@ -55,7 +64,7 @@ defmodule Acmex.Request do
   defp hackney_opts, do: Application.get_env(:acmex, :hackney_opts, [])
 
   defp decode_response(resp),
-    do: %{resp | body: Poison.decode!(resp.body, keys: :atoms)}
+    do: %{resp | body: Jason.decode!(resp.body, keys: :atoms)}
 
   defp jws_headers(url, nonce, kid) when is_nil(kid),
     do: %{"url" => url, "nonce" => nonce}

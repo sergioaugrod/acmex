@@ -43,8 +43,8 @@ defmodule Acmex.MixProject do
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},
       {:excoveralls, "~> 0.10", only: :test},
       {:httpoison, "~> 1.0"},
-      {:jose, "~> 1.8"},
-      {:poison, "~> 3.1"}
+      {:jose, "~> 1.9"},
+      {:jason, "~> 1.0"}
     ]
   end
 

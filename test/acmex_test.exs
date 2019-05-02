@@ -1,10 +1,10 @@
 defmodule AcmexTest do
   use ExUnit.Case, async: true
 
-  alias Acmex.Resource.{Account, Authorization, Order}
+  alias Acmex.Resource.{Account, Authorization}
 
   defp poll_order_status(order) do
-    case Order.reload(order) do
+    case Acmex.get_order(order.url) do
       {:ok, %{status: "valid"} = order} -> order
       {:ok, order} -> poll_order_status(order)
     end

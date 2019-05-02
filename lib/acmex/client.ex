@@ -4,7 +4,7 @@ defmodule Acmex.Client do
   use GenServer
 
   alias Acmex.{Crypto, Request}
-  alias Acmex.Resource.{Account, Challenge, Directory, Order}
+  alias Acmex.Resource.{Account, Authorization, Challenge, Directory, Order}
 
   def init(opts \\ []) do
     keyfile = Keyword.get(opts, :keyfile)
@@ -60,20 +60,35 @@ defmodule Acmex.Client do
   def handle_call({:new_order, identifiers}, _from, state) do
     payload = %{identifiers: Enum.map(identifiers, &Map.new(type: "dns", value: &1))}
 
-    with {:ok, %{url: kid}} <- get_account(state.account, state.directory, state.jwk),
-         {:ok, nonce} <- get_nonce(state.directory),
-         {:ok, resp} <- Request.post(state.directory.new_order, state.jwk, payload, nonce, kid) do
-      {:reply, {:ok, Order.new(resp.body, resp.headers)}, state}
+    with {:ok, resp} <- account_signed_post(state.directory.new_order, payload, state),
+         order <- Order.new(resp.body, resp.headers),
+         order <- fetch_authorizations(order, state) do
+      {:reply, {:ok, order}, state}
     else
       error -> {:reply, error, state}
     end
   end
 
-  def handle_call({:get_order, url}, _from, state),
-    do: {:reply, Order.reload(%Order{url: url}), state}
+  def handle_call({:get_order, url}, _from, state) do
+    with {:ok, resp} <- account_post_as_get(url, state),
+         order <- Order.new(resp.body, resp.headers),
+         order <- fetch_authorizations(order, state),
+         order <- %{order | url: url} do
+      {:reply, {:ok, order}, state}
+    else
+      error -> {:reply, error, state}
+    end
+  end
 
-  def handle_call({:get_challenge, url}, _from, state),
-    do: {:reply, Challenge.reload(%Challenge{url: url}), state}
+  def handle_call({:get_challenge, url}, _from, state) do
+    with {:ok, resp} <- account_post_as_get(url, state),
+         challenge <- Challenge.new(resp.body),
+         challenge <- %{challenge | url: url} do
+      {:reply, {:ok, challenge}, state}
+    else
+      error -> {:reply, error, state}
+    end
+  end
 
   def handle_call({:get_challenge_response, challenge}, _from, %{jwk: jwk} = state),
     do: {:reply, Challenge.get_response(challenge, jwk), state}
@@ -82,10 +97,16 @@ defmodule Acmex.Client do
     {:ok, key_authorization} = Challenge.get_key_authorization(challenge, state.jwk)
     payload = %{key_authorization: key_authorization}
 
-    with {:ok, %{url: kid}} <- get_account(state.account, state.directory, state.jwk),
-         {:ok, nonce} <- get_nonce(state.directory),
-         {:ok, resp} <- Request.post(challenge.url, state.jwk, payload, nonce, kid) do
+    with {:ok, resp} <- account_signed_post(challenge.url, payload, state) do
       {:reply, {:ok, Challenge.new(resp.body)}, state}
+    else
+      error -> {:reply, error, state}
+    end
+  end
+
+  def handle_call({:fetch_authorization, url}, _from, state) do
+    with {:ok, resp} <- account_signed_post(url, nil, state) do
+      {:reply, {:ok, resp.body}, state}
     else
       error -> {:reply, error, state}
     end
@@ -94,9 +115,7 @@ defmodule Acmex.Client do
   def handle_call({:finalize_order, order, csr}, _from, state) do
     payload = %{csr: Base.url_encode64(csr, padding: false)}
 
-    with {:ok, %{url: kid}} <- get_account(state.account, state.directory, state.jwk),
-         {:ok, nonce} <- get_nonce(state.directory),
-         {:ok, resp} <- Request.post(order.finalize, state.jwk, payload, nonce, kid) do
+    with {:ok, resp} <- account_signed_post(order.finalize, payload, state) do
       {:reply, {:ok, Order.new(resp.body, resp.headers)}, state}
     else
       error -> {:reply, error, state}
@@ -104,8 +123,20 @@ defmodule Acmex.Client do
   end
 
   def handle_call({:get_certificate, order}, _from, state) do
-    case Request.get(order.certificate, [{"Accept", "application/pem-certificate-chain"}], nil) do
-      {:ok, resp} -> {:reply, {:ok, resp.body}, state}
+    with {:ok, url} <-
+           (case order.certificate do
+              nil -> {:error, :certificate_not_ready}
+              url -> {:ok, url}
+            end),
+         {:ok, resp} <-
+           account_post_as_get(
+             url,
+             state,
+             [{"Accept", "application/pem-certificate-chain"}],
+             nil
+           ) do
+      {:reply, {:ok, resp.body}, state}
+    else
       error -> {:reply, error, state}
     end
   end
@@ -129,6 +160,32 @@ defmodule Acmex.Client do
     case Request.head(directory.new_nonce) do
       {:ok, resp} -> {:ok, Request.get_header(resp.headers, "Replay-Nonce")}
       error -> error
+    end
+  end
+
+  defp fetch_authorizations(order, state) do
+    %{order | authorizations: Enum.map(order.authorizations, &new_authorization(&1, state))}
+  end
+
+  defp new_authorization(url, state) do
+    with {:ok, resp} <- account_post_as_get(url, state) do
+      Authorization.new(resp.body)
+    end
+  end
+
+  defp account_signed_post(url, payload, state) do
+    with {:ok, %{url: kid}} <- get_account(state.account, state.directory, state.jwk),
+         {:ok, nonce} <- get_nonce(state.directory),
+         {:ok, resp} <- Request.post(url, state.jwk, payload, nonce, kid) do
+      {:ok, resp}
+    end
+  end
+
+  defp account_post_as_get(url, state, headers \\ [], handler \\ :decode) do
+    with {:ok, %{url: kid}} <- get_account(state.account, state.directory, state.jwk),
+         {:ok, nonce} <- get_nonce(state.directory),
+         {:ok, resp} <- Request.post_as_get(url, state.jwk, nonce, kid, headers, handler) do
+      {:ok, resp}
     end
   end
 end

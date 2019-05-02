@@ -45,6 +45,7 @@ defmodule Acmex.OpenSSL do
 
     - key_path: Private key path.
     - subject: Subject attributes.
+    - config_path: Path to an OpenSSL config file. Notably used to configure `subjectAltName` in broader versions of openssl.
 
   ## Examples
 
@@ -53,9 +54,13 @@ defmodule Acmex.OpenSSL do
       {:ok, <<48, 130, 2, 91, 48, 1, ...>>}
 
   """
-  @spec generate_csr(binary(), Map.t()) :: {:ok, bitstring()} | {:error, binary()}
-  def generate_csr(key_path, subject) do
-    openssl(~w(req -new -nodes -key #{key_path} -subj #{format_subject(subject)} -outform DER))
+  @spec generate_csr(binary(), Map.t(), binary()) :: {:ok, bitstring()} | {:error, binary()}
+  def generate_csr(key_path, subject, config_path \\ nil) do
+    openssl(
+      ~w(req -new -nodes -key #{key_path} -subj #{format_subject(subject)} #{
+        format_config_path(config_path)
+      } -outform DER)
+    )
   end
 
   defp openssl(args) do
@@ -70,4 +75,7 @@ defmodule Acmex.OpenSSL do
     |> Enum.map(fn {k, v} -> "/#{@subject_keys[k]}=#{v}" end)
     |> Enum.join()
   end
+
+  def format_config_path(nil), do: ""
+  def format_config_path(config_path), do: "-config #{config_path}"
 end
