@@ -147,7 +147,7 @@ defmodule Acmex.Client do
       reason: reason
     }
 
-    with {:ok, resp} <-
+    with {:ok, _resp} <-
            account_signed_post(
              state.directory.revoke_cert,
              payload,

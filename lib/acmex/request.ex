@@ -21,7 +21,7 @@ defmodule Acmex.Request do
     end
     jws = Crypto.sign(jwk, encoded_payload, jws_headers(url, nonce, kid))
 
-    resp = HTTPoison.post(url, Jason.encode!(jws), @default_headers, hackney: hackney_opts())
+    resp = HTTPoison.post(url, Jason.encode!(jws), @default_headers ++ (headers || []), hackney: hackney_opts())
 
     if handler, do: handle_response(resp, handler), else: handle_response(resp)
   end
@@ -30,7 +30,7 @@ defmodule Acmex.Request do
     jws = Crypto.sign(jwk, "", jws_headers(url, nonce, kid))
 
     resp =
-      HTTPoison.post(url, Jason.encode!(jws), @default_headers ++ headers, hackney: hackney_opts())
+      HTTPoison.post(url, Jason.encode!(jws), @default_headers ++ (headers || []), hackney: hackney_opts())
 
     if handler, do: handle_response(resp, handler), else: handle_response(resp)
   end
