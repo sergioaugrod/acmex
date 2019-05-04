@@ -183,4 +183,23 @@ defmodule Acmex do
   """
   @spec get_certificate(Order.t()) :: certificate_reply()
   def get_certificate(order), do: GenServer.call(Client, {:get_certificate, order})
+
+  @doc """
+  Revoke the certificate.
+
+  The format of the certificate is application/pem-certificate-chain.
+
+  ## Parameters
+
+    - certificate: The certificate to be revoked in DER format (end-entity cert, not the chain).
+    - reason: Optional reason enum.
+
+  ## Examples
+
+      iex> Acmex.revoke_certificate("MIIEDTCCAvegAwIBAgIRAP8...")
+      :ok
+
+  """
+  @spec revoke_certificate(binary(), integer()) :: certificate_reply()
+  def revoke_certificate(certificate, reason \\ 0), do: GenServer.call(Client, {:revoke_certificate, certificate, reason})
 end

@@ -141,6 +141,26 @@ defmodule Acmex.Client do
     end
   end
 
+  def handle_call({:revoke_certificate, certificate, reason}, _from, state) do
+    payload = %{
+      certificate: Base.url_encode64(certificate, padding: false),
+      reason: reason
+    }
+
+    with {:ok, resp} <-
+           account_signed_post(
+             state.directory.revoke_cert,
+             payload,
+             state,
+             nil,
+             nil
+           ) do
+      {:reply, :ok, state}
+    else
+      error -> {:reply, error, state}
+    end
+  end
+
   defp get_account(account, directory, jwk) when is_nil(account),
     do: new_account(directory, jwk, %{onlyReturnExisting: true})
 
@@ -173,19 +193,15 @@ defmodule Acmex.Client do
     end
   end
 
-  defp account_signed_post(url, payload, state) do
+  defp account_signed_post(url, payload, state, headers \\ [], handler \\ :decode) do
     with {:ok, %{url: kid}} <- get_account(state.account, state.directory, state.jwk),
          {:ok, nonce} <- get_nonce(state.directory),
-         {:ok, resp} <- Request.post(url, state.jwk, payload, nonce, kid) do
+         {:ok, resp} <- Request.post(url, state.jwk, payload, nonce, kid, headers, handler) do
       {:ok, resp}
     end
   end
 
   defp account_post_as_get(url, state, headers \\ [], handler \\ :decode) do
-    with {:ok, %{url: kid}} <- get_account(state.account, state.directory, state.jwk),
-         {:ok, nonce} <- get_nonce(state.directory),
-         {:ok, resp} <- Request.post_as_get(url, state.jwk, nonce, kid, headers, handler) do
-      {:ok, resp}
-    end
+    account_signed_post(url, nil, state, headers, handler)
   end
 end

@@ -12,12 +12,18 @@ defmodule Acmex.Request do
     if handler, do: handle_response(resp, handler), else: handle_response(resp)
   end
 
-  def post(url, jwk, payload, nonce, kid \\ nil) do
-    jws = Crypto.sign(jwk, Jason.encode!(payload), jws_headers(url, nonce, kid))
+  def post(url, jwk, payload, nonce, kid \\ nil, headers \\ [], handler \\ :decode) do
+    encoded_payload = if is_nil(payload) do
+      # POST-as-GET
+      ""
+    else
+      Jason.encode!(payload)
+    end
+    jws = Crypto.sign(jwk, encoded_payload, jws_headers(url, nonce, kid))
 
-    url
-    |> HTTPoison.post(Jason.encode!(jws), @default_headers, hackney: hackney_opts())
-    |> handle_response(:decode)
+    resp = HTTPoison.post(url, Jason.encode!(jws), @default_headers, hackney: hackney_opts())
+
+    if handler, do: handle_response(resp, handler), else: handle_response(resp)
   end
 
   def post_as_get(url, jwk, nonce, kid \\ nil, headers \\ [], handler \\ :decode) do
