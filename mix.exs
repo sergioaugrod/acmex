@@ -8,7 +8,7 @@ defmodule Acmex.MixProject do
     [
       app: :acmex,
       deps: deps(),
-      elixir: "~> 1.7",
+      elixir: "~> 1.9",
       test_coverage: [tool: ExCoveralls],
       preferred_cli_env: [
         coveralls: :test,
@@ -39,12 +39,12 @@ defmodule Acmex.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:credo, "~> 0.10.0", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.19", only: :dev, runtime: false},
-      {:excoveralls, "~> 0.10", only: :test},
-      {:httpoison, "~> 1.0"},
-      {:jose, "~> 1.8"},
-      {:poison, "~> 3.1"}
+      {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.21", only: :dev, runtime: false},
+      {:excoveralls, "~> 0.11", only: :test},
+      {:httpoison, "~> 1.5"},
+      {:jose, "~> 1.9"},
+      {:jason, "~> 1.1"}
     ]
   end
 
