@@ -4,7 +4,7 @@ defmodule Acmex.Resource.AuthorizationTest do
   alias Acmex.Resource.Authorization
 
   setup_all do
-    {:ok, order} = Acmex.new_order(["example.com"])
+    {:ok, order} = Acmex.new_order(["example1#{:os.system_time(:seconds)}.com"])
 
     [authorization: List.first(order.authorizations)]
   end

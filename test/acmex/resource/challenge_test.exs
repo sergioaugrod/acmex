@@ -27,21 +27,6 @@ defmodule Acmex.Resource.ChallengeTest do
     end
   end
 
-  describe "Challenge.reload/1" do
-    test "returns updated challenge", %{challenge: challenge} do
-      {:ok, challenge} = Challenge.reload(challenge)
-
-      assert challenge.status == "pending"
-    end
-
-    test "returns error because challenge url is invalid", %{challenge: challenge} do
-      directory_url = Application.get_env(:acmex, :directory_url)
-      challenge = %{challenge | url: "#{directory_url}/chalZ/mGxR5"}
-
-      assert {:error, _} = Challenge.reload(challenge)
-    end
-  end
-
   describe "Challenge.get_response/2" do
     test "returns challenge response", %{challenge: challenge} do
       jwk = Crypto.get_jwk("test/support/fixture/account.key")

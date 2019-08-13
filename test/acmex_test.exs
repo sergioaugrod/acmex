@@ -1,10 +1,10 @@
 defmodule AcmexTest do
   use ExUnit.Case, async: true
 
-  alias Acmex.Resource.{Account, Authorization, Order}
+  alias Acmex.Resource.{Account, Authorization}
 
   defp poll_order_status(order) do
-    case Order.reload(order) do
+    case Acmex.get_order(order.url) do
       {:ok, %{status: "valid"} = order} -> order
       {:ok, order} -> poll_order_status(order)
     end
@@ -53,7 +53,7 @@ defmodule AcmexTest do
 
   describe "Acmex.new_order/1" do
     test "creates a new order" do
-      {:ok, order} = Acmex.new_order(["example.com"])
+      {:ok, order} = Acmex.new_order(["example1.com"])
 
       assert order.status == "pending"
       assert length(order.authorizations) == 1
@@ -62,7 +62,7 @@ defmodule AcmexTest do
 
   describe "Acmex.get_order/1" do
     setup do
-      {:ok, order} = Acmex.new_order(["example.com"])
+      {:ok, order} = Acmex.new_order(["example2.com"])
 
       [order: order]
     end
@@ -76,7 +76,7 @@ defmodule AcmexTest do
 
   describe "Acmex.get_challenge/1" do
     setup do
-      {:ok, order} = Acmex.new_order(["example.com"])
+      {:ok, order} = Acmex.new_order(["example3.com"])
       authorization = List.first(order.authorizations)
 
       [challenge: Authorization.http(authorization)]
@@ -91,7 +91,7 @@ defmodule AcmexTest do
 
   describe "Acmex.get_challenge_response/1" do
     setup do
-      {:ok, order} = Acmex.new_order(["example.com"])
+      {:ok, order} = Acmex.new_order(["example4.com"])
       authorization = List.first(order.authorizations)
 
       [challenge: Authorization.http(authorization)]
@@ -106,7 +106,7 @@ defmodule AcmexTest do
 
   describe "Acmex.validate_challenge/1" do
     setup do
-      {:ok, order} = Acmex.new_order(["example.com"])
+      {:ok, order} = Acmex.new_order(["example#{:os.system_time(:seconds)}.com"])
       authorization = List.first(order.authorizations)
 
       [challenge: Authorization.http(authorization)]

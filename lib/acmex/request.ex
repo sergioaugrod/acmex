@@ -20,6 +20,22 @@ defmodule Acmex.Request do
     |> handle_response(:decode)
   end
 
+  def post_as_get(url, jwk, nonce, kid, []) do
+    jws = Crypto.sign(jwk, "", jws_headers(url, nonce, kid))
+
+    url
+    |> HTTPoison.post(Jason.encode!(jws), @default_headers, hackney: hackney_opts())
+    |> handle_response(:decode)
+  end
+
+  def post_as_get(url, jwk, nonce, kid, headers) do
+    jws = Crypto.sign(jwk, "", jws_headers(url, nonce, kid))
+
+    url
+    |> HTTPoison.post(Jason.encode!(jws), @default_headers ++ headers, hackney: hackney_opts())
+    |> handle_response()
+  end
+
   def head(url) do
     url
     |> HTTPoison.head([], hackney: hackney_opts())

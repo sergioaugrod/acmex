@@ -15,13 +15,6 @@ defmodule Acmex.Resource.Challenge do
 
   def new(challenge), do: struct(__MODULE__, challenge)
 
-  def reload(%__MODULE__{url: url}) do
-    case Request.get(url) do
-      {:ok, resp} -> {:ok, __MODULE__.new(resp.body)}
-      error -> error
-    end
-  end
-
   def get_response(%__MODULE__{type: "http-01"} = challenge, jwk),
     do: get_key_authorization(challenge, jwk)
 

@@ -50,7 +50,7 @@ defmodule Acmex.RequestTest do
       {:ok, response} = Request.head(directory.new_nonce)
 
       assert response.body == ""
-      assert response.status_code == 204
+      assert response.status_code == 200
       assert Request.get_header(response.headers, "Replay-Nonce")
     end
   end
