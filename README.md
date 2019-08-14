@@ -125,7 +125,7 @@ Acmex.get_certificate(order)
 To run the tests you need an `ACME Test Server`. You can use [Pebble](https://github.com/letsencrypt/pebble):
 
 ```bash
-$ docker run -e "PEBBLE_VA_NOSLEEP=1" -e "PEBBLE_VA_ALWAYS_VALID=1" -p 14000:14000 --name some-pebble letsencrypt/pebble
+$ docker run -e "PEBBLE_VA_NOSLEEP=1" -e "PEBBLE_VA_ALWAYS_VALID=1" -e "PEBBLE_WFE_NONCEREJECT=0" -p 14000:14000 letsencrypt/pebble
 $ mix test
 ```
 

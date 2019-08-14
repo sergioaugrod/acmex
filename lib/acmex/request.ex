@@ -20,20 +20,12 @@ defmodule Acmex.Request do
     |> handle_response(:decode)
   end
 
-  def post_as_get(url, jwk, nonce, kid, []) do
-    jws = Crypto.sign(jwk, "", jws_headers(url, nonce, kid))
-
-    url
-    |> HTTPoison.post(Jason.encode!(jws), @default_headers, hackney: hackney_opts())
-    |> handle_response(:decode)
-  end
-
-  def post_as_get(url, jwk, nonce, kid, headers) do
+  def post_as_get(url, jwk, nonce, kid, headers \\ []) do
     jws = Crypto.sign(jwk, "", jws_headers(url, nonce, kid))
 
     url
     |> HTTPoison.post(Jason.encode!(jws), @default_headers ++ headers, hackney: hackney_opts())
-    |> handle_response()
+    |> handle_response(if headers == [], do: :decode, else: nil)
   end
 
   def head(url) do
@@ -58,6 +50,8 @@ defmodule Acmex.Request do
       {:error, error} -> {:error, error}
     end
   end
+
+  defp handle_response(result, nil), do: handle_response(result)
 
   defp handle_response(result) do
     case result do

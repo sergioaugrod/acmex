@@ -3,7 +3,6 @@ defmodule Acmex.Resource.Challenge do
   This structure represents a challenge to prove control of an identifier.
   """
 
-  alias Acmex.Request
   alias JOSE.JWK
 
   defstruct [

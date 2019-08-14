@@ -133,17 +133,22 @@ defmodule Acmex.Client do
     end
   end
 
-  defp post(url, state, payload) do
+  defp get_account_kid_nonce(state) do
     with {:ok, %{url: kid}} <- get_account(state.account, state.directory, state.jwk),
-         {:ok, nonce} <- get_nonce(state.directory),
+         {:ok, nonce} <- get_nonce(state.directory) do
+      %{kid: kid, nonce: nonce}
+    end
+  end
+
+  defp post(url, state, payload) do
+    with %{kid: kid, nonce: nonce} <- get_account_kid_nonce(state),
          {:ok, resp} <- Request.post(url, state.jwk, payload, nonce, kid) do
       {:ok, resp}
     end
   end
 
   defp post_as_get(url, state, headers \\ []) do
-    with {:ok, %{url: kid}} <- get_account(state.account, state.directory, state.jwk),
-         {:ok, nonce} <- get_nonce(state.directory),
+    with %{kid: kid, nonce: nonce} <- get_account_kid_nonce(state),
          {:ok, resp} <- Request.post_as_get(url, state.jwk, nonce, kid, headers) do
       {:ok, resp}
     end
