@@ -10,6 +10,7 @@ defmodule Acmex do
   @type account_reply :: {:ok, Account.t()} | {:error, Response.t()}
   @type challenge_reply :: {:ok, Challenge.t()} | {:error, Response.t()}
   @type certificate_reply :: {:ok, binary()} | {:error, Response.t()}
+  @type certificate_revocation_reply :: :ok | {:error, Response.t()}
   @type on_start_link :: {:ok, pid()} | :ignore | {:error, {:already_started, pid()} | term()}
   @type order_reply :: {:ok, Order.t()} | {:error, Response.t()}
 
@@ -180,6 +181,25 @@ defmodule Acmex do
   """
   @spec get_certificate(Order.t()) :: certificate_reply()
   def get_certificate(order), do: GenServer.call(Client, {:get_certificate, order})
+
+  @doc """
+  Revokes a certificate.
+
+  ## Parameters
+
+    - certificate: The certificate to be revoked.
+    - reason: Optional revocation reason code.
+
+  ## Examples
+
+      iex> Acmex.revoke_certificate("-----BEGIN CERTIFICATE-----...", 0)
+      :ok
+
+  """
+  @spec revoke_certificate(binary(), integer()) :: certificate_revocation_reply()
+  def revoke_certificate(certificate, reason_code \\ 0) do
+    GenServer.call(Client, {:revoke_certificate, certificate, reason_code})
+  end
 
   @spec child_spec(List.t()) :: Supervisor.child_spec()
   def child_spec(args) do
