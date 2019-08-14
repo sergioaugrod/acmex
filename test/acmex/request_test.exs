@@ -45,6 +45,25 @@ defmodule Acmex.RequestTest do
     end
   end
 
+  describe "Request.post_as_get/5" do
+    setup %{directory: directory} do
+      {:ok, response} = Request.head(directory.new_nonce)
+      nonce = Request.get_header(response.headers, "Replay-Nonce")
+      jwk = Crypto.get_jwk("test/support/fixture/account.key")
+      {:ok, %{url: kid}} = Acmex.get_account()
+      {:ok, order} = Acmex.new_order(["example1.com"])
+
+      [order: order, jwk: jwk, nonce: nonce, kid: kid]
+    end
+
+    test "returns response", %{order: order, jwk: jwk, nonce: nonce, kid: kid} do
+      {:ok, response} = Request.post_as_get(order.url, jwk, nonce, kid)
+
+      assert response.status_code == 200
+      assert response.body.status == "pending"
+    end
+  end
+
   describe "Request.head/1" do
     test "returns nonce response", %{directory: directory} do
       {:ok, response} = Request.head(directory.new_nonce)

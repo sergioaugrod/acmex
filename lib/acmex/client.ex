@@ -62,8 +62,8 @@ defmodule Acmex.Client do
   end
 
   def handle_call({:get_challenge, url}, _from, state) do
-    with {:ok, resp} <- post_as_get(url, state),
-         challenge <- Challenge.new(resp.body),
+    with {:ok, %{body: body}} <- post_as_get(url, state),
+         challenge <- Challenge.new(body),
          challenge <- %{challenge | url: url} do
       {:reply, {:ok, challenge}, state}
     else
@@ -78,8 +78,8 @@ defmodule Acmex.Client do
     {:ok, key_authorization} = Challenge.get_key_authorization(challenge, state.jwk)
     payload = %{key_authorization: key_authorization}
 
-    with {:ok, resp} <- post(challenge.url, state, payload) do
-      {:reply, {:ok, Challenge.new(resp.body)}, state}
+    with {:ok, %{body: body}} <- post(challenge.url, state, payload) do
+      {:reply, {:ok, Challenge.new(body)}, state}
     else
       error -> {:reply, error, state}
     end
@@ -97,7 +97,7 @@ defmodule Acmex.Client do
 
   def handle_call({:get_certificate, order}, _from, state) do
     case post_as_get(order.certificate, state, [{"Accept", "application/pem-certificate-chain"}]) do
-      {:ok, resp} -> {:reply, {:ok, resp.body}, state}
+      {:ok, %{body: body}} -> {:reply, {:ok, body}, state}
       error -> {:reply, error, state}
     end
   end
@@ -122,8 +122,8 @@ defmodule Acmex.Client do
   end
 
   defp new_authorization(url, state) do
-    {:ok, resp} = post_as_get(url, state)
-    Authorization.new(resp.body)
+    {:ok, %{body: body}} = post_as_get(url, state)
+    Authorization.new(body)
   end
 
   defp get_nonce(directory) do
@@ -133,9 +133,9 @@ defmodule Acmex.Client do
     end
   end
 
-  defp get_account_kid_nonce(state) do
-    with {:ok, %{url: kid}} <- get_account(state.account, state.directory, state.jwk),
-         {:ok, nonce} <- get_nonce(state.directory) do
+  defp get_account_kid_nonce(%{account: account, directory: directory, jwk: jwk}) do
+    with {:ok, %{url: kid}} <- get_account(account, directory, jwk),
+         {:ok, nonce} <- get_nonce(directory) do
       %{kid: kid, nonce: nonce}
     end
   end
