@@ -1,38 +1,28 @@
 defmodule Acmex.Resource.OrderTest do
   use ExUnit.Case, async: true
 
-  alias Acmex.Request
   alias Acmex.Resource.Order
 
-  setup_all do
-    {:ok, order} = Acmex.new_order(["example.com"])
-
-    [order: order]
-  end
-
   describe "Order.new/2" do
-    test "returns order struct", %{order: order} do
-      {:ok, resp} = Request.get(order.url)
+    test "returns order struct" do
+      attrs = %{
+        authorizations: [
+          "https://localhost:14000/authZ/_6qPZ3Qv9fmwfyvOvu9Y0telWauC77gby35KYmBPvGw"
+        ],
+        expires: "2019-08-15T01:35:30Z",
+        finalize:
+          "https://localhost:14000/finalize-order/KGLHqFBci4gsEpKlPAIIW6jg_zTriQmxSA5Zh6q6pFc",
+        identifiers: [%{type: "dns", value: "example.com"}],
+        status: "ready"
+      }
 
-      order = Order.new(resp.body, resp.headers)
+      headers = [{"Location", "http://sample.com"}]
+
+      order = Order.new(attrs, headers)
 
       assert order.__struct__ == Order
-      assert order.status == "pending"
-    end
-  end
-
-  describe "Order.reload/1" do
-    test "returns updated order", %{order: order} do
-      {:ok, order} = Order.reload(order)
-
-      assert order.status == "pending"
-    end
-
-    test "returns error because order url is invalid", %{order: order} do
-      directory_url = Application.get_env(:acmex, :directory_url)
-      order = %{order | url: "#{directory_url}/my-order/mGxR5"}
-
-      assert {:error, _} = Order.reload(order)
+      assert order.url == "http://sample.com"
+      assert order.status == attrs.status
     end
   end
 end

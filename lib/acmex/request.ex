@@ -13,11 +13,19 @@ defmodule Acmex.Request do
   end
 
   def post(url, jwk, payload, nonce, kid \\ nil) do
-    jws = Crypto.sign(jwk, Poison.encode!(payload), jws_headers(url, nonce, kid))
+    jws = Crypto.sign(jwk, Jason.encode!(payload), jws_headers(url, nonce, kid))
 
     url
-    |> HTTPoison.post(Poison.encode!(jws), @default_headers, hackney: hackney_opts())
+    |> HTTPoison.post(Jason.encode!(jws), @default_headers, hackney: hackney_opts())
     |> handle_response(:decode)
+  end
+
+  def post_as_get(url, jwk, nonce, kid, headers \\ []) do
+    jws = Crypto.sign(jwk, "", jws_headers(url, nonce, kid))
+
+    url
+    |> HTTPoison.post(Jason.encode!(jws), @default_headers ++ headers, hackney: hackney_opts())
+    |> handle_response(if headers == [], do: :decode, else: nil)
   end
 
   def head(url) do
@@ -43,6 +51,8 @@ defmodule Acmex.Request do
     end
   end
 
+  defp handle_response(result, nil), do: handle_response(result)
+
   defp handle_response(result) do
     case result do
       {:ok, %{status_code: 200} = resp} -> {:ok, resp}
@@ -55,7 +65,7 @@ defmodule Acmex.Request do
   defp hackney_opts, do: Application.get_env(:acmex, :hackney_opts, [])
 
   defp decode_response(resp),
-    do: %{resp | body: Poison.decode!(resp.body, keys: :atoms)}
+    do: %{resp | body: Jason.decode!(resp.body, keys: :atoms)}
 
   defp jws_headers(url, nonce, kid) when is_nil(kid),
     do: %{"url" => url, "nonce" => nonce}

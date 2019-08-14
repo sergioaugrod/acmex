@@ -25,8 +25,8 @@ defmodule Acmex.CryptoTest do
 
       body = %{termsOfServiceAgreed: true, contact: ["mailto:info@example.com"]}
 
-      jws = Crypto.sign(jwk, Poison.encode!(body), headers)
-      protected = Poison.decode!(JWS.peek_protected(jws))
+      jws = Crypto.sign(jwk, Jason.encode!(body), headers)
+      protected = Jason.decode!(JWS.peek_protected(jws))
 
       assert protected["alg"] == "RS256"
       assert protected["url"] == "https://localhost:14000/sign-me-up"
@@ -42,8 +42,8 @@ defmodule Acmex.CryptoTest do
 
       body = %{termsOfServiceAgreed: true, contact: ["mailto:info@example.com"]}
 
-      jws = Crypto.sign(jwk, Poison.encode!(body), headers)
-      protected = Poison.decode!(JWS.peek_protected(jws))
+      jws = Crypto.sign(jwk, Jason.encode!(body), headers)
+      protected = Jason.decode!(JWS.peek_protected(jws))
 
       assert protected["alg"] == "RS256"
       assert protected["url"] == "https://localhost:14000/sign-me-up"

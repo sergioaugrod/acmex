@@ -2,7 +2,7 @@ version: '3'
 
 services:
   pebble:
-    image: letsencrypt/pebble:2018-09-28
+    image: letsencrypt/pebble
     environment:
       - PEBBLE_VA_NOSLEEP=1
       - PEBBLE_VA_ALWAYS_VALID=1
