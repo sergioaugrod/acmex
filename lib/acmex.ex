@@ -34,7 +34,7 @@ defmodule Acmex do
   """
   @spec start_link(binary(), atom()) :: on_start_link()
   def start_link(keyfile, name \\ Client),
-    do: GenServer.start_link(Client, [keyfile: keyfile], name: name)
+    do: Client.start_link(keyfile, name)
 
   @doc """
   Creates a new account.
@@ -180,4 +180,13 @@ defmodule Acmex do
   """
   @spec get_certificate(Order.t()) :: certificate_reply()
   def get_certificate(order), do: GenServer.call(Client, {:get_certificate, order})
+
+  @spec child_spec(List.t()) :: Supervisor.child_spec()
+  def child_spec(args) do
+    %{
+      id: __MODULE__,
+      type: :worker,
+      start: {__MODULE__, :start_link, args}
+    }
+  end
 end

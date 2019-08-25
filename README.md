@@ -46,6 +46,14 @@ And now start the client with the generated key file:
 Acmex.start_link("/path/account.key")
 ```
 
+To use on your supervisor:
+
+```elixir
+children = [
+  {Acmex, ["/path/account.key"]}
+]
+```
+
 ### Account
 
 #### Creating a new account

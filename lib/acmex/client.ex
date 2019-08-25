@@ -6,6 +6,9 @@ defmodule Acmex.Client do
   alias Acmex.{Crypto, Request}
   alias Acmex.Resource.{Account, Authorization, Challenge, Directory, Order}
 
+  def start_link(keyfile, name \\ __MODULE__),
+    do: GenServer.start_link(__MODULE__, [keyfile: keyfile], name: name)
+
   def init(keyfile: keyfile) do
     with true <- File.exists?(keyfile),
          {:ok, directory} <- Directory.new() do
