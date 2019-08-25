@@ -19,13 +19,14 @@ defmodule Acmex.OpenSSLTest do
     end
   end
 
-  describe "OpenSSL.generate_csr/2" do
+  describe "OpenSSL.generate_csr/3" do
     test "generates a certificate signing request file" do
       key_path = "/tmp/#{:os.system_time()}"
       OpenSSL.generate_key(:rsa, key_path)
       on_exit(fn -> File.rm!(key_path) end)
 
-      {:ok, csr} = OpenSSL.generate_csr(key_path, %{common_name: "example.com"})
+      {:ok, csr} =
+        OpenSSL.generate_csr(key_path, ["example.com"], %{organization_name: "Example"})
 
       assert is_bitstring(csr)
     end

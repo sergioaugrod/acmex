@@ -118,7 +118,7 @@ Acmex.get_challenge(challenge.url)
 
 ```elixir
 Acmex.OpenSSL.generate_key(:rsa, "/path/order.key")
-{:ok, csr} = Acmex.OpenSSL.generate_csr("/path/order.key", %{common_name: "example.com"})
+{:ok, csr} = Acmex.OpenSSL.generate_csr("/path/order.key", ["example.com"])
 {:ok, order} = Acmex.finalize_order(order, csr)
 ```
 

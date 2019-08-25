@@ -7,7 +7,6 @@ defmodule Acmex.OpenSSL do
 
   @rsa_key_sizes [2048, 3072, 4096]
   @subject_keys %{
-    common_name: "CN",
     country_name: "C",
     locality_name: "L",
     organization_name: "O",
@@ -44,18 +43,48 @@ defmodule Acmex.OpenSSL do
   ## Parameters
 
     - key_path: Private key path.
+    - domains: List of domains.
     - subject: Subject attributes.
 
   ## Examples
 
-      iex> subject = %{common_name: "example.com"}
-      iex> Acmex.OpenSSL.generate_csr("/tmp/private.key", subject)
+      iex> subject = %{organization_name: "Example"}
+      iex> Acmex.OpenSSL.generate_csr("/tmp/private.key", ["example.com"], subject)
       {:ok, <<48, 130, 2, 91, 48, 1, ...>>}
 
   """
-  @spec generate_csr(binary(), Map.t()) :: {:ok, bitstring()} | {:error, binary()}
-  def generate_csr(key_path, subject) do
-    openssl(~w(req -new -nodes -key #{key_path} -subj #{format_subject(subject)} -outform DER))
+  @spec generate_csr(binary(), List.t(), Map.t()) :: {:ok, bitstring()} | {:error, binary()}
+  def generate_csr(key_path, domains, subject \\ %{}) do
+    csr_config_temp = "/tmp/#{Enum.join(domains, "")}-#{:os.system_time()}"
+    File.write!(csr_config_temp, csr_config(domains))
+
+    result =
+      openssl(
+        ~w(req -new -sha256 -key #{key_path} -subj #{format_subject(subject)} -reqexts SAN -config #{
+          csr_config_temp
+        } -outform DER)
+      )
+
+    File.rm!(csr_config_temp)
+    result
+  end
+
+  defp csr_config(domains) do
+    """
+    [ req_distinguished_name ]
+
+    [ req ]
+
+    distinguished_name = req_distinguished_name
+
+    [ v3_req ]
+
+    keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+
+    [ SAN ]
+
+    subjectAltName = DNS:#{Enum.join(domains, ", DNS:")}
+    """
   end
 
   defp openssl(args) do
@@ -64,6 +93,8 @@ defmodule Acmex.OpenSSL do
       {error, 1} -> {:error, error}
     end
   end
+
+  defp format_subject(%{}), do: "/"
 
   defp format_subject(subject) do
     subject

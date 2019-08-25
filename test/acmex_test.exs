@@ -129,7 +129,9 @@ defmodule AcmexTest do
       challenge = Authorization.http(authorization)
       Acmex.validate_challenge(challenge)
 
-      [csr: File.read!("test/support/fixture/order.csr"), order: order]
+      {:ok, csr} = Acmex.OpenSSL.generate_csr("test/support/fixture/order.key", ["example.com"])
+
+      [csr: csr, order: order]
     end
 
     test "finalizes an order", %{csr: csr, order: order} do
