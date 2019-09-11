@@ -40,11 +40,12 @@ defmodule Acmex.MixProject do
   defp deps do
     [
       {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.0.0-rc.6", only: [:dev], runtime: false},
       {:ex_doc, "~> 0.21", only: :dev, runtime: false},
       {:excoveralls, "~> 0.11", only: :test},
       {:httpoison, "~> 1.5"},
-      {:jose, "~> 1.9"},
-      {:jason, "~> 1.1"}
+      {:jason, "~> 1.1"},
+      {:jose, "~> 1.9"}
     ]
   end
 

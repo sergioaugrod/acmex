@@ -105,6 +105,17 @@ defmodule Acmex.Client do
     end
   end
 
+  def handle_call({:revoke_certificate, certificate, reason}, _from, state) do
+    [{:Certificate, der_certificate, _enc}, _] = :public_key.pem_decode(certificate)
+    payload = %{certificate: Base.url_encode64(der_certificate, padding: false), reason: reason}
+
+    with {:ok, _resp} <- post(state.directory.revoke_cert, state, payload) do
+      {:reply, :ok, state}
+    else
+      error -> {:reply, error, state}
+    end
+  end
+
   defp get_account(account, directory, jwk) when is_nil(account),
     do: new_account(directory, jwk, %{onlyReturnExisting: true})
 

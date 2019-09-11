@@ -160,4 +160,23 @@ defmodule AcmexTest do
       assert certificate =~ "BEGIN CERTIFICATE"
     end
   end
+
+  describe "Acmex.revoke_certificate/2" do
+    setup do
+      {:ok, order} = Acmex.new_order(["example.com"])
+      authorization = List.first(order.authorizations)
+      challenge = Authorization.http(authorization)
+      Acmex.validate_challenge(challenge)
+      csr = File.read!("test/support/fixture/order.csr")
+      Acmex.finalize_order(order, csr)
+      order = poll_order_status(order)
+      {:ok, certificate} = Acmex.get_certificate(order)
+
+      [certificate: certificate]
+    end
+
+    test "revokes a certificate", %{certificate: certificate} do
+      assert :ok == Acmex.revoke_certificate(certificate, 0)
+    end
+  end
 end

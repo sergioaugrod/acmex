@@ -128,6 +128,13 @@ Acmex.OpenSSL.generate_key(:rsa, "/path/order.key")
 Acmex.get_certificate(order)
 ```
 
+#### Revoke a certificate
+
+```elixir
+{:ok, certificate} = Acmex.get_certificate(order)
+Acmex.revoke_certificate(certificate, 0)
+```
+
 ## Development
 
 To run the tests you need an `ACME Test Server`. You can use [Pebble](https://github.com/letsencrypt/pebble):

@@ -9,7 +9,8 @@ defmodule Acmex do
 
   @type account_reply :: {:ok, Account.t()} | {:error, Response.t()}
   @type challenge_reply :: {:ok, Challenge.t()} | {:error, Response.t()}
-  @type certificate_reply :: {:ok, binary()} | {:error, Response.t()}
+  @type certificate_reply :: {:ok, String.t()} | {:error, Response.t()}
+  @type certificate_revocation_reply :: :ok | {:error, Response.t()}
   @type on_start_link :: {:ok, pid()} | :ignore | {:error, {:already_started, pid()} | term()}
   @type order_reply :: {:ok, Order.t()} | {:error, Response.t()}
 
@@ -32,7 +33,7 @@ defmodule Acmex do
       {:ok, #PID<...>}
 
   """
-  @spec start_link(binary(), atom()) :: on_start_link()
+  @spec start_link(String.t(), atom()) :: on_start_link()
   def start_link(keyfile, name \\ Client),
     do: Client.start_link(keyfile, name)
 
@@ -50,7 +51,7 @@ defmodule Acmex do
       {:ok, %Account{...}}
 
   """
-  @spec new_account([binary()], boolean()) :: account_reply()
+  @spec new_account([String.t()], boolean()) :: account_reply()
   def new_account(contact, tos), do: GenServer.call(Client, {:new_account, contact, tos})
 
   @doc """
@@ -79,7 +80,7 @@ defmodule Acmex do
       {:ok, %Order{...}}
 
   """
-  @spec new_order([binary()]) :: order_reply()
+  @spec new_order([String.t()]) :: order_reply()
   def new_order(identifiers), do: GenServer.call(Client, {:new_order, identifiers})
 
   @doc """
@@ -95,7 +96,7 @@ defmodule Acmex do
       {:ok, %Order{...}}
 
   """
-  @spec get_order(binary()) :: order_reply()
+  @spec get_order(String.t()) :: order_reply()
   def get_order(url), do: GenServer.call(Client, {:get_order, url})
 
   @doc """
@@ -111,7 +112,7 @@ defmodule Acmex do
       {:ok, %Challenge{...}}
 
   """
-  @spec get_challenge(binary()) :: challenge_reply()
+  @spec get_challenge(String.t()) :: challenge_reply()
   def get_challenge(url), do: GenServer.call(Client, {:get_challenge, url})
 
   @doc """
@@ -127,7 +128,7 @@ defmodule Acmex do
       {:ok, "LXk0qPoRi53T3nYAzB66IWpeWtaFQ4fGCp4IOiJY-Ms.5zmJUVWaucybUNJSLeCaO9D_cauS5QiwA92KTiY_vNc"}
 
   """
-  @spec get_challenge_response(Challenge.t()) :: {:ok, binary()}
+  @spec get_challenge_response(Challenge.t()) :: {:ok, String.t()}
   def get_challenge_response(challenge),
     do: GenServer.call(Client, {:get_challenge_response, challenge})
 
@@ -160,7 +161,7 @@ defmodule Acmex do
       {:ok, %Order{status: "processing"}}
 
   """
-  @spec finalize_order(Order.t(), binary()) :: challenge_reply()
+  @spec finalize_order(Order.t(), String.t()) :: challenge_reply()
   def finalize_order(order, csr), do: GenServer.call(Client, {:finalize_order, order, csr})
 
   @doc """
@@ -181,7 +182,26 @@ defmodule Acmex do
   @spec get_certificate(Order.t()) :: certificate_reply()
   def get_certificate(order), do: GenServer.call(Client, {:get_certificate, order})
 
-  @spec child_spec(List.t()) :: Supervisor.child_spec()
+  @doc """
+  Revokes a certificate.
+
+  ## Parameters
+
+    - certificate: The certificate to be revoked.
+    - reason: Optional revocation reason code.
+
+  ## Examples
+
+      iex> Acmex.revoke_certificate("-----BEGIN CERTIFICATE-----...", 0)
+      :ok
+
+  """
+  @spec revoke_certificate(String.t(), integer()) :: certificate_revocation_reply()
+  def revoke_certificate(certificate, reason_code \\ 0) do
+    GenServer.call(Client, {:revoke_certificate, certificate, reason_code})
+  end
+
+  @spec child_spec(list()) :: Supervisor.child_spec()
   def child_spec(args) do
     %{
       id: __MODULE__,
