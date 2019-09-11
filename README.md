@@ -37,20 +37,20 @@ You need to generate a private key to start the client. Acmex actually expects a
 If you don't have it, you can create one through Acmex:
 
 ```elixir
-Acmex.OpenSSL.generate_key(:rsa, "/path/account.key")
+key = Acmex.OpenSSL.generate_key(:rsa)
 ```
 
-And now start the client with the generated key file:
+And now start the client with the generated key:
 
 ```elixir
-Acmex.start_link("/path/account.key")
+Acmex.start_link(key: key)
 ```
 
 To use on your supervisor:
 
 ```elixir
 children = [
-  {Acmex, ["/path/account.key"]}
+  {Acmex, [key: "-----BEGIN RSA PRIVATE KEY-----..."]}
 ]
 ```
 
@@ -117,8 +117,8 @@ Acmex.get_challenge(challenge.url)
 #### Finalize an order
 
 ```elixir
-Acmex.OpenSSL.generate_key(:rsa, "/path/order.key")
-{:ok, csr} = Acmex.OpenSSL.generate_csr("/path/order.key", ["example.com"])
+order_key = Acmex.OpenSSL.generate_key(:rsa)
+{:ok, csr} = Acmex.OpenSSL.generate_csr(order_key, ["example.com"])
 {:ok, order} = Acmex.finalize_order(order, csr)
 ```
 

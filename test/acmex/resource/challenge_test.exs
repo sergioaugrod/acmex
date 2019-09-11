@@ -29,7 +29,7 @@ defmodule Acmex.Resource.ChallengeTest do
 
   describe "Challenge.get_response/2" do
     test "returns challenge response", %{challenge: challenge} do
-      jwk = Crypto.get_jwk("test/support/fixture/account.key")
+      {:ok, jwk} = Crypto.fetch_jwk_from_key(File.read!("test/support/fixture/account.key"))
 
       {:ok, response} = Challenge.get_response(challenge, jwk)
 
@@ -39,7 +39,7 @@ defmodule Acmex.Resource.ChallengeTest do
 
   describe "Challenge.get_key_authorization/2" do
     test "returns challenge key authorization", %{challenge: challenge} do
-      jwk = Crypto.get_jwk("test/support/fixture/account.key")
+      {:ok, jwk} = Crypto.fetch_jwk_from_key(File.read!("test/support/fixture/account.key"))
 
       {:ok, authorization} = Challenge.get_key_authorization(challenge, jwk)
 
