@@ -29,7 +29,8 @@ defmodule Acmex.OpenSSL do
       {:ok, "/tmp/private.key"}
 
   """
-  @spec generate_key(:rsa, binary(), rsa_key_sizes()) :: {:ok, binary()} | {:error, binary()}
+  @spec generate_key(:rsa, String.t(), rsa_key_sizes()) ::
+          {:ok, String.t()} | {:error, String.t()}
   def generate_key(:rsa, key_path, size \\ 2048) when size in @rsa_key_sizes do
     case openssl(~w(genrsa -out #{key_path} #{size})) do
       {:ok, _} -> {:ok, key_path}
@@ -53,7 +54,7 @@ defmodule Acmex.OpenSSL do
       {:ok, <<48, 130, 2, 91, 48, 1, ...>>}
 
   """
-  @spec generate_csr(binary(), List.t(), Map.t()) :: {:ok, bitstring()} | {:error, binary()}
+  @spec generate_csr(String.t(), list(), map()) :: {:ok, bitstring()} | {:error, String.t()}
   def generate_csr(key_path, domains, subject \\ %{}) do
     csr_config_temp = "/tmp/#{Enum.join(domains, "")}-#{:os.system_time()}"
     File.write!(csr_config_temp, csr_config(domains))
