@@ -11,7 +11,11 @@ defmodule Acmex do
   @type challenge_reply :: {:ok, Challenge.t()} | {:error, Response.t()}
   @type certificate_reply :: {:ok, String.t()} | {:error, Response.t()}
   @type certificate_revocation_reply :: :ok | {:error, Response.t()}
-  @type on_start_link :: {:ok, pid()} | :ignore | {:error, {:already_started, pid()} | term()}
+  @type on_start_link ::
+          {:ok, pid()}
+          | :ignore
+          | {:error, {:already_started, pid()} | term()}
+          | {:error, String.t()}
   @type order_reply :: {:ok, Order.t()} | {:error, Response.t()}
 
   @doc """
@@ -26,16 +30,30 @@ defmodule Acmex do
 
   ## Examples
 
-      iex> Acmex.start_link("test/support/fixture/account.key")
+      iex> Acmex.start_link(keyfile: "test/support/fixture/account.key")
       {:ok, #PID<...>}
 
-      iex> Acmex.start_link("test/support/fixture/account.key", :acmex_optional_name)
+      iex> Acmex.start_link(key: "-----BEGIN RSA PRIVATE KEY-----...", name: :acmex_optional_name)
       {:ok, #PID<...>}
 
   """
-  @spec start_link(String.t(), atom()) :: on_start_link()
-  def start_link(keyfile, name \\ Client),
-    do: Client.start_link(keyfile, name)
+  @spec start_link(keyword()) :: on_start_link()
+  def start_link(opts) do
+    name = Keyword.get(opts, :name, Client)
+    keyfile = Keyword.get(opts, :keyfile)
+    key = Keyword.get(opts, :key)
+
+    cond do
+      keyfile && File.exists?(keyfile) ->
+        Client.start_link(File.read!(keyfile), name)
+
+      is_binary(key) && key != "" ->
+        Client.start_link(key, name)
+
+      true ->
+        {:error, "invalid key or keyfile does not exist"}
+    end
+  end
 
   @doc """
   Creates a new account.

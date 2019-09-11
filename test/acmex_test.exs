@@ -1,6 +1,7 @@
 defmodule AcmexTest do
   use ExUnit.Case, async: true
 
+  alias Acmex.OpenSSL
   alias Acmex.Resource.{Account, Authorization}
 
   defp poll_order_status(order) do
@@ -11,15 +12,20 @@ defmodule AcmexTest do
   end
 
   describe "Acmex.start_link/1" do
-    test "returns ok" do
-      assert {:ok, _} = Acmex.start_link("test/support/fixture/account.key", :acmex_test)
+    test "returns ok when keyfile is present" do
+      assert {:ok, _} =
+               Acmex.start_link(keyfile: "test/support/fixture/account.key", name: :acmex_test)
+    end
+
+    test "returns ok when key is present" do
+      assert {:ok, _} = Acmex.start_link(key: OpenSSL.generate_key(:rsa), name: :acmex_test)
     end
 
     test "returns error" do
       Process.flag(:trap_exit, true)
-      result = Acmex.start_link("test/support/fixture/account2.key", :acmex_test)
+      result = Acmex.start_link(keyfile: "test/support/fixture/account2.key", name: :acmex_test)
 
-      assert result == {:error, "keyfile test/support/fixture/account2.key does not exists"}
+      assert result == {:error, "invalid key or keyfile does not exist"}
     end
   end
 
@@ -123,7 +129,8 @@ defmodule AcmexTest do
       challenge = Authorization.http(authorization)
       Acmex.validate_challenge(challenge)
 
-      {:ok, csr} = Acmex.OpenSSL.generate_csr("test/support/fixture/order.key", ["example.com"])
+      key = OpenSSL.generate_key(:rsa)
+      {:ok, csr} = OpenSSL.generate_csr(key, ["example.com"])
 
       [csr: csr, order: order]
     end

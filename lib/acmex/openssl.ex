@@ -20,22 +20,18 @@ defmodule Acmex.OpenSSL do
   ## Parameters
 
     - type: Private key type.
-    - key_path: Private key path.
     - size: Private key size.
 
   ## Examples
 
-      iex> Acmex.OpenSSL.generate_key(:rsa, "/tmp/private.key")
-      {:ok, "/tmp/private.key"}
+      iex> Acmex.OpenSSL.generate_key(:rsa, 2048)
+      "-----BEGIN RSA PRIVATE KEY-----..."
 
   """
-  @spec generate_key(:rsa, String.t(), rsa_key_sizes()) ::
-          {:ok, String.t()} | {:error, String.t()}
-  def generate_key(:rsa, key_path, size \\ 2048) when size in @rsa_key_sizes do
-    case openssl(~w(genrsa -out #{key_path} #{size})) do
-      {:ok, _} -> {:ok, key_path}
-      {:error, error} -> {:error, error}
-    end
+  @spec generate_key(:rsa, rsa_key_sizes()) :: String.t()
+  def generate_key(:rsa, size \\ 2048) when size in @rsa_key_sizes do
+    key = :public_key.generate_key({:rsa, size, 65_537})
+    :public_key.pem_encode([:public_key.pem_entry_encode(:RSAPrivateKey, key)])
   end
 
   @doc """
@@ -50,23 +46,28 @@ defmodule Acmex.OpenSSL do
   ## Examples
 
       iex> subject = %{organization_name: "Example"}
-      iex> Acmex.OpenSSL.generate_csr("/tmp/private.key", ["example.com"], subject)
+      iex> Acmex.OpenSSL.generate_csr("-----BEGIN RSA PRIVATE KEY-----...", ["example.com"], subject)
       {:ok, <<48, 130, 2, 91, 48, 1, ...>>}
 
   """
   @spec generate_csr(String.t(), list(), map()) :: {:ok, bitstring()} | {:error, String.t()}
-  def generate_csr(key_path, domains, subject \\ %{}) do
-    csr_config_temp = "/tmp/#{Enum.join(domains, "")}-#{:os.system_time()}"
-    File.write!(csr_config_temp, csr_config(domains))
+  def generate_csr(key, domains, subject \\ %{}) do
+    csr_config_tempfile = "/tmp/#{Enum.join(domains, "")}-#{:os.system_time()}.csr"
+    key_tempfile = "/tmp/#{Enum.join(domains, "")}-#{:os.system_time()}.key"
+
+    File.write!(csr_config_tempfile, csr_config(domains))
+    File.write!(key_tempfile, key)
 
     result =
       openssl(
-        ~w(req -new -sha256 -key #{key_path} -subj #{format_subject(subject)} -reqexts SAN -config #{
-          csr_config_temp
+        ~w(req -new -sha256 -key #{key_tempfile} -subj #{format_subject(subject)} -reqexts SAN -config #{
+          csr_config_tempfile
         } -outform DER)
       )
 
-    File.rm!(csr_config_temp)
+    File.rm!(csr_config_tempfile)
+    File.rm!(key_tempfile)
+
     result
   end
 

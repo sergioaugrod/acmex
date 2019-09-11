@@ -5,16 +5,17 @@ defmodule Acmex.CryptoTest do
   alias JOSE.JWK
   alias JOSE.JWS
 
-  describe "Crypto.get_jwk/1" do
+  describe "Crypto.fetch_jwk_from_key/1" do
     test "returns jwk" do
-      jwk = Crypto.get_jwk("test/support/fixture/account.key")
+      {:ok, jwk} = Crypto.fetch_jwk_from_key(File.read!("test/support/fixture/account.key"))
       assert JWK.thumbprint(jwk) == "5zmJUVWaucybUNJSLeCaO9D_cauS5QiwA92KTiY_vNc"
     end
   end
 
   describe "Crypto.sign/3" do
     setup do
-      [jwk: Crypto.get_jwk("test/support/fixture/account.key")]
+      {:ok, jwk} = Crypto.fetch_jwk_from_key(File.read!("test/support/fixture/account.key"))
+      [jwk: jwk]
     end
 
     test "signs a payload with a header without kid", %{jwk: jwk} do

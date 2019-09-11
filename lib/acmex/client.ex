@@ -6,21 +6,20 @@ defmodule Acmex.Client do
   alias Acmex.{Crypto, Request}
   alias Acmex.Resource.{Account, Authorization, Challenge, Directory, Order}
 
-  def start_link(keyfile, name \\ __MODULE__),
-    do: GenServer.start_link(__MODULE__, [keyfile: keyfile], name: name)
+  def start_link(key, name \\ __MODULE__),
+    do: GenServer.start_link(__MODULE__, [key: key], name: name)
 
-  def init(keyfile: keyfile) do
-    with true <- File.exists?(keyfile),
+  def init(key: key) do
+    with {:ok, jwk} <- Crypto.fetch_jwk_from_key(key),
          {:ok, directory} <- Directory.new() do
       state = %{
         directory: directory,
-        jwk: Crypto.get_jwk(keyfile),
+        jwk: jwk,
         account: nil
       }
 
       {:ok, state}
     else
-      false -> {:stop, "keyfile #{keyfile} does not exists"}
       {:error, error} -> {:stop, error}
     end
   end
