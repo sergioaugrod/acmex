@@ -64,6 +64,9 @@ defmodule Acmex.Request do
 
   defp hackney_opts, do: Application.get_env(:acmex, :hackney_opts, [])
 
+  defp decode_response(%{body: ""} = resp),
+    do: %{resp | body: %{}}
+
   defp decode_response(resp),
     do: %{resp | body: Jason.decode!(resp.body, keys: :atoms)}
 

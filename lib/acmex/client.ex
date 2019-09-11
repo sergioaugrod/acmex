@@ -107,7 +107,7 @@ defmodule Acmex.Client do
 
   def handle_call({:revoke_certificate, certificate, reason}, _from, state) do
     [{:Certificate, der_certificate, _enc}, _] = :public_key.pem_decode(certificate)
-    payload = %{csr: Base.url_encode64(der_certificate, padding: false), reason: reason}
+    payload = %{certificate: Base.url_encode64(der_certificate, padding: false), reason: reason}
 
     with {:ok, _resp} <- post(state.directory.revoke_cert, state, payload) do
       {:reply, :ok, state}
