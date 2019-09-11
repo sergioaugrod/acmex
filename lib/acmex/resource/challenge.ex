@@ -5,15 +5,16 @@ defmodule Acmex.Resource.Challenge do
 
   alias JOSE.JWK
 
-  defstruct [
-    :status,
-    :token,
-    :type,
-    :url
-  ]
+  @enforce_keys [:status, :token, :type, :url]
 
+  defstruct @enforce_keys
+
+  @type t :: %__MODULE__{status: String.t(), token: String.t(), type: String.t(), url: String.t()}
+
+  @spec new(map()) :: __MODULE__.t()
   def new(challenge), do: struct(__MODULE__, challenge)
 
+  @spec get_response(__MODULE__.t(), map()) :: {:ok, String.t()}
   def get_response(%__MODULE__{type: "http-01"} = challenge, jwk),
     do: get_key_authorization(challenge, jwk)
 

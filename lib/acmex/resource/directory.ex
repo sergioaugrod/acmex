@@ -5,7 +5,7 @@ defmodule Acmex.Resource.Directory do
 
   alias Acmex.{Config, Request}
 
-  defstruct [
+  @enforce_keys [
     :caa_identities,
     :key_change,
     :new_account,
@@ -16,6 +16,20 @@ defmodule Acmex.Resource.Directory do
     :new_nonce
   ]
 
+  defstruct @enforce_keys
+
+  @type t :: %__MODULE__{
+          caa_identities: String.t(),
+          key_change: String.t(),
+          new_account: String.t(),
+          new_order: String.t(),
+          revoke_cert: String.t(),
+          terms_of_service: String.t(),
+          website: String.t(),
+          new_nonce: String.t()
+        }
+
+  @spec new(String.t()) :: {:ok, __MODULE__.t()} | {:error, String.t()}
   def new(directory_url \\ Config.directory_url()) do
     directory_url
     |> get_directory()

@@ -3,14 +3,12 @@ defmodule Acmex.Resource.Account do
   This structure represents information about an account.
   """
 
-  defstruct [
-    :agreement,
-    :contact,
-    :created_at,
-    :id,
-    :status,
-    :url
-  ]
+  @enforce_keys [:contact, :status, :url]
 
+  defstruct @enforce_keys
+
+  @type t :: %__MODULE__{contact: [String.t()], status: String.t(), url: String.t()}
+
+  @spec new(map()) :: __MODULE__.t()
   def new(account), do: struct(__MODULE__, account)
 end

@@ -5,7 +5,7 @@ defmodule Acmex.Resource.Order do
 
   alias Acmex.Request
 
-  defstruct [
+  @enforce_keys [
     :authorizations,
     :certificate,
     :expires,
@@ -15,6 +15,19 @@ defmodule Acmex.Resource.Order do
     :url
   ]
 
+  defstruct @enforce_keys
+
+  @type t :: %__MODULE__{
+          authorizations: [String.t()],
+          certificate: String.t(),
+          expires: String.t(),
+          finalize: String.t(),
+          identifiers: [%{type: String.t(), value: String.t()}],
+          status: String.t(),
+          url: String.t()
+        }
+
+  @spec new(map(), keyword()) :: __MODULE__.t()
   def new(order, headers \\ []) do
     url =
       case Request.get_header(headers, "Location") do

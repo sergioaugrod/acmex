@@ -28,10 +28,7 @@ defmodule AcmexTest do
       {:ok, account} = Acmex.new_account(["mailto:info@example.com"], true)
 
       assert %Account{
-               agreement: nil,
                contact: ["mailto:info@example.com"],
-               created_at: nil,
-               id: nil,
                status: "valid"
              } = account
     end
@@ -42,10 +39,7 @@ defmodule AcmexTest do
       {:ok, account} = Acmex.get_account()
 
       assert %Account{
-               agreement: nil,
                contact: ["mailto:info@example.com"],
-               created_at: nil,
-               id: nil,
                status: "valid"
              } = account
     end
