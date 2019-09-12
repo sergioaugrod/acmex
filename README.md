@@ -50,7 +50,7 @@ To use on your supervisor:
 
 ```elixir
 children = [
-  {Acmex, [key: "-----BEGIN RSA PRIVATE KEY-----..."]}
+  {Acmex, [[key: "-----BEGIN RSA PRIVATE KEY-----..."]]}
 ]
 ```
 
