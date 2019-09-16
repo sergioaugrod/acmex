@@ -5,10 +5,13 @@ defmodule Acmex.Resource.ChallengeTest do
   alias Acmex.Resource.{Authorization, Challenge}
 
   setup_all do
-    {:ok, order} = Acmex.new_order(["example.com"])
+    {:ok, order} = Acmex.new_order(["example-challenge-test.com"])
     authorization = List.first(order.authorizations)
 
-    [challenge: Authorization.http(authorization)]
+    [
+      http_challenge: Authorization.http(authorization),
+      dns_challenge: Authorization.dns(authorization)
+    ]
   end
 
   describe "Challenge.new/1" do
@@ -28,17 +31,29 @@ defmodule Acmex.Resource.ChallengeTest do
   end
 
   describe "Challenge.get_response/2" do
-    test "returns challenge response", %{challenge: challenge} do
+    test "returns challenge response when type is http", %{http_challenge: challenge} do
       {:ok, jwk} = Crypto.fetch_jwk_from_key(File.read!("test/support/fixture/account.key"))
 
       {:ok, response} = Challenge.get_response(challenge, jwk)
 
-      assert String.length(response) == 87
+      assert String.length(response.key_authorization) == 87
+      assert response.content_type == "text/plain"
+      assert response.filename == ".well-known/acme-challenge/#{response.key_authorization}"
+    end
+
+    test "returns challenge response when type is dns", %{dns_challenge: challenge} do
+      {:ok, jwk} = Crypto.fetch_jwk_from_key(File.read!("test/support/fixture/account.key"))
+
+      {:ok, response} = Challenge.get_response(challenge, jwk)
+
+      assert String.length(response.key_authorization) == 43
+      assert response.record_name == "_acme-challenge"
+      assert response.record_type == "TXT"
     end
   end
 
   describe "Challenge.get_key_authorization/2" do
-    test "returns challenge key authorization", %{challenge: challenge} do
+    test "returns challenge key authorization", %{http_challenge: challenge} do
       {:ok, jwk} = Crypto.fetch_jwk_from_key(File.read!("test/support/fixture/account.key"))
 
       {:ok, authorization} = Challenge.get_key_authorization(challenge, jwk)
