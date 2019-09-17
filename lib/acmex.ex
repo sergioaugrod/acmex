@@ -142,8 +142,21 @@ defmodule Acmex do
 
   ## Examples
 
-      iex> Acmex.get_challenge_response(%Challenge{token: "LXk0qPoRi53T3nYAzB66IWpeWtaFQ4fGCp4IOiJY-Ms"})
-      {:ok, "LXk0qPoRi53T3nYAzB66IWpeWtaFQ4fGCp4IOiJY-Ms.5zmJUVWaucybUNJSLeCaO9D_cauS5QiwA92KTiY_vNc"}
+      iex> Acmex.get_challenge_response(%Challenge{token: "bZxymov025OYA4DkGSI5XPKdAW9V93eKoDZZ56AC3cI", type: "dns-01"})
+      {:ok,
+         %{
+           key_authorization: "AgemQZ-WIft7VwWljRb3l_nkyigEILfRzzx5E6HdFyY",
+           record_name: "_acme-challenge",
+           record_type: "TXT"
+         }}
+
+      iex> Acmex.get_challenge_response(%Challenge{token: "oR3Xwj4GgXIxUtKMUfmVf4hmRFehAIgSsg7oXD_PCEw", type: "http-01"})
+      {:ok,
+         %{
+           content_type: "text/plain",
+           filename: ".well-known/acme-challenge/oR3Xwj4GgXIxUtKMUfmVf4hmRFehAIgSsg7oXD_PCEw.5zmJUVWaucybUNJSLeCaO9D_cauS5QiwA92KTiY_vNc",
+           key_authorization: "oR3Xwj4GgXIxUtKMUfmVf4hmRFehAIgSsg7oXD_PCEw.5zmJUVWaucybUNJSLeCaO9D_cauS5QiwA92KTiY_vNc"
+         }}
 
   """
   @spec get_challenge_response(Challenge.t()) :: {:ok, String.t()}

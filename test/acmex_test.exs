@@ -94,13 +94,26 @@ defmodule AcmexTest do
       {:ok, order} = Acmex.new_order(["example4.com"])
       authorization = List.first(order.authorizations)
 
-      [challenge: Authorization.http(authorization)]
+      [
+        http_challenge: Authorization.http(authorization),
+        dns_challenge: Authorization.dns(authorization)
+      ]
     end
 
-    test "returns the challenge authorization key", %{challenge: challenge} do
+    test "returns challenge response when type is http", %{http_challenge: challenge} do
       {:ok, response} = Acmex.get_challenge_response(challenge)
 
-      assert String.length(response) == 87
+      assert String.length(response.key_authorization) == 87
+      assert response.content_type == "text/plain"
+      assert response.filename == ".well-known/acme-challenge/#{response.key_authorization}"
+    end
+
+    test "returns challenge response when type is dns", %{dns_challenge: challenge} do
+      {:ok, response} = Acmex.get_challenge_response(challenge)
+
+      assert String.length(response.key_authorization) == 43
+      assert response.record_name == "_acme-challenge"
+      assert response.record_type == "TXT"
     end
   end
 
