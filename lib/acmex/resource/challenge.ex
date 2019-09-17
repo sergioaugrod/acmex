@@ -10,13 +10,11 @@ defmodule Acmex.Resource.Challenge do
   defstruct @enforce_keys
 
   @type t :: %__MODULE__{status: String.t(), token: String.t(), type: String.t(), url: String.t()}
-
   @type dns_response :: %{
           key_authorization: String.t(),
           record_name: String.t(),
           record_type: String.t()
         }
-
   @type http_response :: %{
           content_type: String.t(),
           filename: String.t(),
@@ -30,7 +28,7 @@ defmodule Acmex.Resource.Challenge do
   def get_response(%__MODULE__{type: "dns-01"} = challenge, jwk) do
     {:ok, key_authorization} = get_key_authorization(challenge, jwk)
 
-    response =
+    key_authorization =
       :sha256
       |> :crypto.hash(key_authorization)
       |> Base.url_encode64(padding: false)
@@ -39,7 +37,7 @@ defmodule Acmex.Resource.Challenge do
      %{
        record_name: "_acme-challenge",
        record_type: "TXT",
-       key_authorization: response
+       key_authorization: key_authorization
      }}
   end
 

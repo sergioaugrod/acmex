@@ -159,7 +159,7 @@ defmodule Acmex do
          }}
 
   """
-  @spec get_challenge_response(Challenge.t()) :: {:ok, String.t()}
+  @spec get_challenge_response(Challenge.t()) :: {:ok, map()}
   def get_challenge_response(challenge),
     do: GenServer.call(Client, {:get_challenge_response, challenge})
 
