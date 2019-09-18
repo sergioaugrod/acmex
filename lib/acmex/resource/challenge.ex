@@ -41,13 +41,13 @@ defmodule Acmex.Resource.Challenge do
      }}
   end
 
-  def get_response(%__MODULE__{} = challenge, jwk) do
+  def get_response(%__MODULE__{token: token} = challenge, jwk) do
     {:ok, key_authorization} = get_key_authorization(challenge, jwk)
 
     {:ok,
      %{
        key_authorization: key_authorization,
-       filename: ".well-known/acme-challenge/#{key_authorization}",
+       filename: ".well-known/acme-challenge/#{token}",
        content_type: "text/plain"
      }}
   end

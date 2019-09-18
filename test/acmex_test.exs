@@ -105,7 +105,7 @@ defmodule AcmexTest do
 
       assert String.length(response.key_authorization) == 87
       assert response.content_type == "text/plain"
-      assert response.filename == ".well-known/acme-challenge/#{response.key_authorization}"
+      assert response.filename == ".well-known/acme-challenge/#{challenge.token}"
     end
 
     test "returns challenge response when type is dns", %{dns_challenge: challenge} do

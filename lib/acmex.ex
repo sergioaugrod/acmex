@@ -154,7 +154,7 @@ defmodule Acmex do
       {:ok,
          %{
            content_type: "text/plain",
-           filename: ".well-known/acme-challenge/oR3Xwj4GgXIxUtKMUfmVf4hmRFehAIgSsg7oXD_PCEw.5zmJUVWaucybUNJSLeCaO9D_cauS5QiwA92KTiY_vNc",
+           filename: ".well-known/acme-challenge/oR3Xwj4GgXIxUtKMUfmVf4hmRFehAIgSsg7oXD_PCEw",
            key_authorization: "oR3Xwj4GgXIxUtKMUfmVf4hmRFehAIgSsg7oXD_PCEw.5zmJUVWaucybUNJSLeCaO9D_cauS5QiwA92KTiY_vNc"
          }}
 
