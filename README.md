@@ -2,8 +2,6 @@
 
 Acmex is an Elixir Client for the Lets Encrypt [ACMEv2](https://github.com/ietf-wg-acme/acme) protocol.
 
-The client provides basic functions to create a certificate with `Lets Encrypt ACMEv2`, but there are features that haven't yet been implemented.
-
 ## Installation
 
 The package can be installed by adding `acmex` to your list of dependencies in `mix.exs`:
@@ -89,7 +87,6 @@ Acmex.get_order(order.url)
 #### Receive a challenge
 
 ```elixir
-{:ok, order} = Acmex.new_order(["example.com"])
 authorization = List.first(order.authorizations)
 challenge = Acmex.Resource.Authorization.http(authorization)
 ```

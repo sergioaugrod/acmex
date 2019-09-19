@@ -150,6 +150,8 @@ defmodule Acmex.Client do
     with {:ok, %{url: kid}} <- get_account(account, directory, jwk),
          {:ok, nonce} <- get_nonce(directory) do
       %{kid: kid, nonce: nonce}
+    else
+      error -> error
     end
   end
 
@@ -157,6 +159,12 @@ defmodule Acmex.Client do
     with %{kid: kid, nonce: nonce} <- get_account_kid_nonce(state),
          {:ok, resp} <- Request.post(url, state.jwk, payload, nonce, kid) do
       {:ok, resp}
+    else
+      {:error, %HTTPoison.Response{body: %{type: "urn:ietf:params:acme:error:badNonce"}}} ->
+        post(url, state, payload)
+
+      error ->
+        error
     end
   end
 
@@ -164,6 +172,12 @@ defmodule Acmex.Client do
     with %{kid: kid, nonce: nonce} <- get_account_kid_nonce(state),
          {:ok, resp} <- Request.post_as_get(url, state.jwk, nonce, kid, headers) do
       {:ok, resp}
+    else
+      {:error, %HTTPoison.Response{body: %{type: "urn:ietf:params:acme:error:badNonce"}}} ->
+        post_as_get(url, state, headers)
+
+      error ->
+        error
     end
   end
 end
