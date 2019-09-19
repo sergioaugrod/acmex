@@ -2,14 +2,8 @@ defmodule AcmexTest do
   use ExUnit.Case, async: true
 
   alias Acmex.OpenSSL
+  alias Acmex.Support
   alias Acmex.Resource.{Account, Authorization}
-
-  defp poll_order_status(order) do
-    case Acmex.get_order(order.url) do
-      {:ok, %{status: "valid"} = order} -> order
-      {:ok, order} -> poll_order_status(order)
-    end
-  end
 
   describe "Acmex.start_link/1" do
     test "returns ok when keyfile is present" do
@@ -53,16 +47,16 @@ defmodule AcmexTest do
 
   describe "Acmex.new_order/1" do
     test "creates a new order" do
-      {:ok, order} = Acmex.new_order(["example1.com"])
+      {:ok, order} = Acmex.new_order(Support.Order.generate_random_domains(2))
 
       assert order.status == "pending"
-      assert length(order.authorizations) == 1
+      assert length(order.authorizations) == 2
     end
   end
 
   describe "Acmex.get_order/1" do
     setup do
-      {:ok, order} = Acmex.new_order(["example2.com"])
+      {:ok, order} = Acmex.new_order(Support.Order.generate_random_domains())
 
       [order: order]
     end
@@ -76,7 +70,7 @@ defmodule AcmexTest do
 
   describe "Acmex.get_challenge/1" do
     setup do
-      {:ok, order} = Acmex.new_order(["example3.com"])
+      {:ok, order} = Acmex.new_order(Support.Order.generate_random_domains())
       authorization = List.first(order.authorizations)
 
       [challenge: Authorization.http(authorization)]
@@ -91,7 +85,7 @@ defmodule AcmexTest do
 
   describe "Acmex.get_challenge_response/1" do
     setup do
-      {:ok, order} = Acmex.new_order(["example4.com"])
+      {:ok, order} = Acmex.new_order(Support.Order.generate_random_domains())
       authorization = List.first(order.authorizations)
 
       [
@@ -119,7 +113,7 @@ defmodule AcmexTest do
 
   describe "Acmex.validate_challenge/1" do
     setup do
-      {:ok, order} = Acmex.new_order(["example#{:os.system_time(:seconds)}.com"])
+      {:ok, order} = Acmex.new_order(Support.Order.generate_random_domains())
       authorization = List.first(order.authorizations)
 
       [challenge: Authorization.http(authorization)]
@@ -137,13 +131,10 @@ defmodule AcmexTest do
 
   describe "Acmex.finalize_order/2" do
     setup do
-      {:ok, order} = Acmex.new_order(["example.com"])
-      authorization = List.first(order.authorizations)
-      challenge = Authorization.http(authorization)
-      Acmex.validate_challenge(challenge)
+      %{order: order, domains: domains} = Support.Order.create("valid")
 
       key = OpenSSL.generate_key(:rsa)
-      {:ok, csr} = OpenSSL.generate_csr(key, ["example.com"])
+      {:ok, csr} = OpenSSL.generate_csr(key, domains)
 
       [csr: csr, order: order]
     end
@@ -158,13 +149,7 @@ defmodule AcmexTest do
 
   describe "Acmex.get_certificate/1" do
     setup do
-      {:ok, order} = Acmex.new_order(["example.com"])
-      authorization = List.first(order.authorizations)
-      challenge = Authorization.http(authorization)
-      Acmex.validate_challenge(challenge)
-      csr = File.read!("test/support/fixture/order.csr")
-      Acmex.finalize_order(order, csr)
-      order = poll_order_status(order)
+      %{order: order} = Support.Order.create("finalized")
 
       [order: order]
     end
@@ -177,13 +162,7 @@ defmodule AcmexTest do
 
   describe "Acmex.revoke_certificate/2" do
     setup do
-      {:ok, order} = Acmex.new_order(["example.com"])
-      authorization = List.first(order.authorizations)
-      challenge = Authorization.http(authorization)
-      Acmex.validate_challenge(challenge)
-      csr = File.read!("test/support/fixture/order.csr")
-      Acmex.finalize_order(order, csr)
-      order = poll_order_status(order)
+      %{order: order} = Support.Order.create("finalized")
       {:ok, certificate} = Acmex.get_certificate(order)
 
       [certificate: certificate]
