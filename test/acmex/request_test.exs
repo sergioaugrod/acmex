@@ -27,17 +27,33 @@ defmodule Acmex.RequestTest do
 
   describe "Request.post/5" do
     setup %{directory: directory} do
-      {:ok, response} = Request.head(directory.new_nonce)
-      nonce = Request.get_header(response.headers, "Replay-Nonce")
+      get_nonce = fn ->
+        {:ok, response} = Request.head(directory.new_nonce)
+        Request.get_header(response.headers, "Replay-Nonce")
+      end
+
       {:ok, jwk} = Crypto.fetch_jwk_from_key(File.read!("test/support/fixture/account.key"))
 
-      [directory: directory, jwk: jwk, nonce: nonce]
+      [directory: directory, jwk: jwk, get_nonce: get_nonce]
     end
 
-    test "returns response", %{directory: directory, jwk: jwk, nonce: nonce} do
+    test "returns response", %{directory: directory, jwk: jwk, get_nonce: get_nonce} do
       payload = %{contact: ["mailto:info@example.com"], termsOfServiceAgreed: true}
 
-      {:ok, response} = Request.post(directory.new_account, jwk, payload, nonce)
+      post = fn post, directory_new_account, jwk, payload, nonce ->
+        case Request.post(directory_new_account, jwk, payload, nonce) do
+          {:ok, _} = result ->
+            result
+
+          {:error, _response} ->
+            nonce = get_nonce.()
+            post.(post, directory_new_account, jwk, payload, nonce)
+        end
+      end
+
+      nonce = get_nonce.()
+
+      {:ok, response} = post.(post, directory.new_account, jwk, payload, nonce)
 
       assert response.status_code == 200
       assert response.body.status == "valid"
@@ -47,17 +63,33 @@ defmodule Acmex.RequestTest do
 
   describe "Request.post_as_get/5" do
     setup %{directory: directory} do
-      {:ok, response} = Request.head(directory.new_nonce)
-      nonce = Request.get_header(response.headers, "Replay-Nonce")
+      get_nonce = fn ->
+        {:ok, response} = Request.head(directory.new_nonce)
+        Request.get_header(response.headers, "Replay-Nonce")
+      end
+
       {:ok, jwk} = Crypto.fetch_jwk_from_key(File.read!("test/support/fixture/account.key"))
       {:ok, %{url: kid}} = Acmex.get_account()
       {:ok, order} = Acmex.new_order(["example1.com"])
 
-      [order: order, jwk: jwk, nonce: nonce, kid: kid]
+      [order: order, jwk: jwk, get_nonce: get_nonce, kid: kid]
     end
 
-    test "returns response", %{order: order, jwk: jwk, nonce: nonce, kid: kid} do
-      {:ok, response} = Request.post_as_get(order.url, jwk, nonce, kid)
+    test "returns response", %{order: order, jwk: jwk, get_nonce: get_nonce, kid: kid} do
+      post_as_get = fn post_as_get, order_url, jwk, nonce, kid ->
+        case Request.post_as_get(order_url, jwk, nonce, kid) do
+          {:ok, _} = result ->
+            result
+
+          {:error, _response} ->
+            nonce = get_nonce.()
+            post_as_get.(post_as_get, order_url, jwk, nonce, kid)
+        end
+      end
+
+      nonce = get_nonce.()
+
+      {:ok, response} = post_as_get.(post_as_get, order.url, jwk, nonce, kid)
 
       assert response.status_code == 200
       assert response.body.status == "pending"

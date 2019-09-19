@@ -45,8 +45,7 @@ defmodule Acmex.Request do
     case result do
       {:ok, %{status_code: 200} = resp} -> {:ok, decode_response(resp)}
       {:ok, %{status_code: 201} = resp} -> {:ok, decode_response(resp)}
-      {:ok, %{status_code: 400} = resp} -> {:error, decode_response(resp)}
-      {:ok, resp} -> {:error, resp}
+      {:ok, resp} -> {:error, decode_response(resp)}
       {:error, error} -> {:error, error}
     end
   end
@@ -62,17 +61,24 @@ defmodule Acmex.Request do
     end
   end
 
-  defp hackney_opts, do: Application.get_env(:acmex, :hackney_opts, [])
-
   defp decode_response(%{body: ""} = resp),
     do: %{resp | body: %{}}
 
   defp decode_response(resp),
-    do: %{resp | body: Jason.decode!(resp.body, keys: :atoms)}
+    do: %{resp | body: decode_body(resp.body)}
+
+  defp decode_body(body) do
+    case Jason.decode(body, keys: :atoms) do
+      {:ok, decoded_body} -> decoded_body
+      {:error, _} -> body
+    end
+  end
 
   defp jws_headers(url, nonce, kid) when is_nil(kid),
     do: %{"url" => url, "nonce" => nonce}
 
   defp jws_headers(url, nonce, kid),
     do: %{"url" => url, "nonce" => nonce, "kid" => kid}
+
+  defp hackney_opts, do: Application.get_env(:acmex, :hackney_opts, [])
 end

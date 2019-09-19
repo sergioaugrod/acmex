@@ -9,7 +9,6 @@ defmodule Acmex.Resource.Challenge do
 
   defstruct @enforce_keys
 
-  @type t :: %__MODULE__{status: String.t(), token: String.t(), type: String.t(), url: String.t()}
   @type dns_response :: %{
           key_authorization: String.t(),
           record_name: String.t(),
@@ -20,6 +19,8 @@ defmodule Acmex.Resource.Challenge do
           filename: String.t(),
           key_authorization: String.t()
         }
+
+  @type t :: %__MODULE__{status: String.t(), token: String.t(), type: String.t(), url: String.t()}
 
   @spec new(map()) :: __MODULE__.t()
   def new(challenge), do: struct(__MODULE__, challenge)

@@ -16,6 +16,7 @@ defmodule Acmex.MixProject do
         "coveralls.post": :test,
         "coveralls.html": :test
       ],
+      elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       version: @version,
 
@@ -64,4 +65,7 @@ defmodule Acmex.MixProject do
       source_url: @repo_url
     ]
   end
+
+  defp elixirc_paths(:test), do: ["test/support", "lib"]
+  defp elixirc_paths(_), do: ["lib"]
 end
