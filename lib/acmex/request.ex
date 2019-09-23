@@ -46,7 +46,7 @@ defmodule Acmex.Request do
       {:ok, %{status_code: 200} = resp} -> {:ok, decode_response(resp)}
       {:ok, %{status_code: 201} = resp} -> {:ok, decode_response(resp)}
       {:ok, resp} -> {:error, decode_response(resp)}
-      {:error, error} -> {:error, error}
+      {:error, error} -> {:error, decode_response(error)}
     end
   end
 
@@ -64,8 +64,10 @@ defmodule Acmex.Request do
   defp decode_response(%{body: ""} = resp),
     do: %{resp | body: %{}}
 
-  defp decode_response(resp),
-    do: %{resp | body: decode_body(resp.body)}
+  defp decode_response(%{body: body} = resp),
+    do: %{resp | body: decode_body(body)}
+
+  defp decore_response(resp), do: resp
 
   defp decode_body(body) do
     case Jason.decode(body, keys: :atoms) do
