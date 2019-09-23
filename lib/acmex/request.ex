@@ -67,7 +67,7 @@ defmodule Acmex.Request do
   defp decode_response(%{body: body} = resp),
     do: %{resp | body: decode_body(body)}
 
-  defp decore_response(resp), do: resp
+  defp decode_response(resp), do: resp
 
   defp decode_body(body) do
     case Jason.decode(body, keys: :atoms) do
