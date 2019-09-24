@@ -126,7 +126,11 @@ defmodule Acmex.Client do
       url = Request.get_header(resp.headers, "Location")
       {:ok, Account.new(Map.put(resp.body, :url, url))}
     else
-      error -> error
+      {:error, %HTTPoison.Response{body: %{type: "urn:ietf:params:acme:error:badNonce"}}} ->
+        new_account(directory, jwk, payload)
+
+      error ->
+        error
     end
   end
 
