@@ -56,8 +56,8 @@ defmodule Acmex.Request do
     case result do
       {:ok, %{status_code: 200} = resp} -> {:ok, resp}
       {:ok, %{status_code: 204} = resp} -> {:ok, resp}
-      {:ok, resp} -> {:error, resp}
-      {:error, error} -> {:error, error}
+      {:ok, resp} -> {:error, decode_response(resp)}
+      {:error, error} -> {:error, decode_response(error)}
     end
   end
 
