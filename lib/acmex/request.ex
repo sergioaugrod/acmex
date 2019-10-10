@@ -3,8 +3,7 @@ defmodule Acmex.Request do
 
   alias Acmex.Crypto
 
-  @repo_url "https://www.github.com/sergioaugrod/acmex"
-  @user_agent "Acmex v#{Mix.Project.config()[:version]} (#{@repo_url})"
+  @user_agent "Acmex v#{Mix.Project.config()[:version]}"
   @default_headers [{"User-Agent", @user_agent}, {"Content-Type", "application/jose+json"}]
 
   def get(url, headers \\ [], handler \\ :decode) do
