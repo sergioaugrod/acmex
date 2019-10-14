@@ -80,9 +80,8 @@ defmodule Acmex.Client do
     {:ok, key_authorization} = Challenge.get_key_authorization(challenge, state.jwk)
     payload = %{key_authorization: key_authorization}
 
-    with {:ok, %{body: body}} <- post(challenge.url, state, payload) do
-      {:reply, {:ok, Challenge.new(body)}, state}
-    else
+    case post(challenge.url, state, payload) do
+      {:ok, %{body: body}} -> {:reply, {:ok, Challenge.new(body)}, state}
       error -> {:reply, error, state}
     end
   end
@@ -90,9 +89,8 @@ defmodule Acmex.Client do
   def handle_call({:finalize_order, order, csr}, _from, state) do
     payload = %{csr: Base.url_encode64(csr, padding: false)}
 
-    with {:ok, resp} <- post(order.finalize, state, payload) do
-      {:reply, {:ok, Order.new(resp.body, resp.headers)}, state}
-    else
+    case post(order.finalize, state, payload) do
+      {:ok, resp} -> {:reply, {:ok, Order.new(resp.body, resp.headers)}, state}
       error -> {:reply, error, state}
     end
   end
@@ -108,9 +106,8 @@ defmodule Acmex.Client do
     [{:Certificate, der_certificate, _enc}, _] = :public_key.pem_decode(certificate)
     payload = %{certificate: Base.url_encode64(der_certificate, padding: false), reason: reason}
 
-    with {:ok, _resp} <- post(state.directory.revoke_cert, state, payload) do
-      {:reply, :ok, state}
-    else
+    case post(state.directory.revoke_cert, state, payload) do
+      {:ok, _resp} -> {:reply, :ok, state}
       error -> {:reply, error, state}
     end
   end
