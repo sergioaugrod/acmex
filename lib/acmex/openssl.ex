@@ -50,25 +50,23 @@ defmodule Acmex.OpenSSL do
       {:ok, <<48, 130, 2, 91, 48, 1, ...>>}
 
   """
-  @spec generate_csr(String.t(), list(), map()) :: {:ok, bitstring()} | {:error, String.t()}
+  @spec generate_csr(String.t(), list(), map()) :: {:ok, bitstring()} | {:error, any()}
   def generate_csr(key, domains, subject \\ %{}) do
-    csr_config_tempfile = "/tmp/#{Enum.join(domains, "")}-#{:os.system_time()}.csr"
-    key_tempfile = "/tmp/#{Enum.join(domains, "")}-#{:os.system_time()}.key"
+    temp_dir = System.tmp_dir()
+    csr_config_tempfile = "/#{temp_dir}/#{UUID.uuid4()}.csr"
+    key_tempfile = "/#{temp_dir}/#{UUID.uuid4()}.key"
 
-    File.write!(csr_config_tempfile, csr_config(domains))
-    File.write!(key_tempfile, key)
-
-    result =
-      openssl(
-        ~w(req -new -sha256 -key #{key_tempfile} -subj #{format_subject(subject)} -reqexts SAN -config #{
-          csr_config_tempfile
-        } -outform DER)
-      )
-
-    File.rm!(csr_config_tempfile)
-    File.rm!(key_tempfile)
-
-    result
+    with :ok <- File.write(csr_config_tempfile, csr_config(domains)),
+         :ok <- File.write(key_tempfile, key),
+         {:ok, result} <-
+           openssl(
+             ~w(req -new -sha256 -key #{key_tempfile} -subj #{format_subject(subject)} -reqexts SAN
+             -config #{csr_config_tempfile} -outform DER)
+           ),
+         :ok <- File.rm(csr_config_tempfile),
+         :ok <- File.rm(key_tempfile) do
+      {:ok, result}
+    end
   end
 
   defp csr_config(domains) do
