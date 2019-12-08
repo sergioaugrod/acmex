@@ -9,7 +9,7 @@ The package can be installed by adding `acmex` to your list of dependencies in `
 ```elixir
 def deps do
   [
-    {:acmex, github: "sergioaugrod/acmex"}
+    {:acmex, "~> 0.1.0"}
   ]
 end
 ```
@@ -131,6 +131,10 @@ Acmex.get_certificate(order)
 {:ok, certificate} = Acmex.get_certificate(order)
 Acmex.revoke_certificate(certificate, 0)
 ```
+
+## Documentation
+
+The full documentation can be found at [https://hexdocs.pm/acmex](https://hexdocs.pm/acmex).
 
 ## Development
 
