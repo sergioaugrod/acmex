@@ -7,6 +7,7 @@ defmodule Acmex.MixProject do
   def project do
     [
       app: :acmex,
+      aliases: aliases(),
       deps: deps(),
       elixir: "~> 1.9",
       test_coverage: [tool: ExCoveralls],
@@ -40,14 +41,20 @@ defmodule Acmex.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:credo, "~> 1.1", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.0.0-rc.6", only: [:dev], runtime: false},
+      {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:elixir_uuid, "~> 1.2"},
       {:ex_doc, "~> 0.21", only: :dev, runtime: false},
-      {:excoveralls, "~> 0.11", only: :test},
+      {:excoveralls, "~> 0.12", only: :test},
       {:httpoison, "~> 1.6"},
-      {:jason, "~> 1.1"},
-      {:jose, "~> 1.9"}
+      {:jason, "~> 1.2"},
+      {:jose, "~> 1.10"}
+    ]
+  end
+
+  defp aliases do
+    [
+      quality: ["format --check-formatted", "credo --strict"]
     ]
   end
 

@@ -1,4 +1,7 @@
-# Acmex [![Build Status](https://travis-ci.org/sergioaugrod/acmex.svg?branch=master)](https://travis-ci.org/sergioaugrod/acmex)
+# Acmex
+
+![](https://github.com/sergioaugrod/acmex/workflows/CI/badge.svg)
+[![Hex.pm](https://img.shields.io/hexpm/v/acmex.svg)](https://hex.pm/packages/acmex)
 
 Acmex is an Elixir Client for the Lets Encrypt [ACMEv2](https://github.com/ietf-wg-acme/acme) protocol.
 
@@ -134,36 +137,25 @@ Acmex.revoke_certificate(certificate, 0)
 
 ## Documentation
 
-The full documentation can be found at [https://hexdocs.pm/acmex](https://hexdocs.pm/acmex).
-
-## Development
-
-To run the tests you need an `ACME Test Server`. You can use [Pebble](https://github.com/letsencrypt/pebble):
-
-```bash
-$ docker run -e "PEBBLE_VA_NOSLEEP=1" -e "PEBBLE_VA_ALWAYS_VALID=1" -e "PEBBLE_WFE_NONCEREJECT=0" -p 14000:14000 letsencrypt/pebble
-$ mix test
-```
-
-Or using docker:
-
-```bash
-docker-compose run test
-```
+The full documentation can be found at https://hexdocs.pm/acmex.
 
 ## Contributing
 
-1. Clone it!
-2. Create your feature branch: `git checkout -b my-new-feature`
-3. Commit your changes: `git commit -am 'Add some feature'`
-4. Push to the branch: `git push origin my-new-feature`
-5. Submit a pull request :D
+To run the tests you need an `ACME Test Server`. You can use [Pebble](https://github.com/letsencrypt/pebble).
+For this reason, there is a `docker-compose.yml` file with `pebble` defined as a service.
+
+To use `pebble` and run the tests:
+
+```bash
+$ docker-compose up
+$ mix test
+```
 
 ## License
 
 MIT License
 
-Copyright (c) 2019 Sérgio Rodrigues
+Copyright (c) 2020 Sérgio Rodrigues
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
