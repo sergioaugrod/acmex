@@ -7,6 +7,7 @@ defmodule Acmex.MixProject do
   def project do
     [
       app: :acmex,
+      aliases: aliases(),
       deps: deps(),
       elixir: "~> 1.9",
       test_coverage: [tool: ExCoveralls],
@@ -48,6 +49,12 @@ defmodule Acmex.MixProject do
       {:httpoison, "~> 1.6"},
       {:jason, "~> 1.2"},
       {:jose, "~> 1.10"}
+    ]
+  end
+
+  defp aliases do
+    [
+      quality: ["format --check-formatted", "credo --strict"]
     ]
   end
 
