@@ -3,13 +3,13 @@ defmodule Acmex.OpenSSLTest do
 
   alias Acmex.OpenSSL
 
-  describe "OpenSSL.generate_key/2" do
-    test "generates a rsa private key" do
+  describe "generate_key/2" do
+    test "generates a RSA private key" do
       assert OpenSSL.generate_key(:rsa, 2048) =~ "PRIVATE KEY"
     end
   end
 
-  describe "OpenSSL.generate_csr/3" do
+  describe "generate_csr/3" do
     test "generates a certificate signing request file" do
       key = OpenSSL.generate_key(:rsa)
 

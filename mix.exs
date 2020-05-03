@@ -60,6 +60,7 @@ defmodule Acmex.MixProject do
 
   defp package do
     [
+      files: ["lib", "mix.exs", "LICENSE", "CHANGELOG.md", "README.md"],
       maintainers: ["Sérgio Rodrigues"],
       licenses: ["MIT"],
       links: %{"GitHub" => @repo_url}
@@ -68,6 +69,7 @@ defmodule Acmex.MixProject do
 
   defp docs do
     [
+      extras: ["README.md", "CHANGELOG.md"],
       main: "Acmex",
       source_ref: "v#{@version}",
       source_url: @repo_url

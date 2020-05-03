@@ -3,20 +3,19 @@ defmodule Acmex.Resource.AccountTest do
 
   alias Acmex.Resource.Account
 
-  describe "Account.new/1" do
-    test "returns account struct" do
+  describe "new/1" do
+    test "returns an account struct" do
       attrs = %{
-        agreement: nil,
         contact: ["mailto:info@example.com"],
-        created_at: nil,
-        id: 313_120_931,
+        url: "http://localhost:14000/acme/acct/1",
         status: "valid"
       }
 
-      account = Account.new(attrs)
-
-      assert account.__struct__ == Account
-      assert account.status == "valid"
+      assert %Account{
+               contact: ["mailto:info@example.com"],
+               status: "valid",
+               url: "http://localhost:14000/acme/acct/1"
+             } = Account.new(attrs)
     end
   end
 end

@@ -5,16 +5,16 @@ defmodule Acmex.Resource.Directory do
 
   alias Acmex.{Config, Request}
 
-  @enforce_keys [
-    :caa_identities,
-    :key_change,
-    :new_account,
-    :new_order,
-    :revoke_cert,
-    :terms_of_service,
-    :website,
-    :new_nonce
-  ]
+  @enforce_keys ~w(
+    caa_identities
+    key_change
+    new_account
+    new_order
+    revoke_cert
+    terms_of_service
+    website
+    new_nonce
+  )a
 
   defstruct @enforce_keys
 
@@ -29,7 +29,10 @@ defmodule Acmex.Resource.Directory do
           new_nonce: String.t()
         }
 
-  @spec new(String.t()) :: {:ok, __MODULE__.t()} | {:error, String.t()}
+  @doc """
+  Builds a directory struct.
+  """
+  @spec new(String.t()) :: {:ok, t()} | {:error, String.t()}
   def new(directory_url \\ Config.directory_url()) do
     directory_url
     |> get_directory()
@@ -37,7 +40,6 @@ defmodule Acmex.Resource.Directory do
   end
 
   defp get_directory(nil), do: {:error, "directory_url is not configured"}
-
   defp get_directory(directory_url), do: Request.get(directory_url)
 
   defp parse_directory({:error, reason}), do: {:error, reason}

@@ -3,8 +3,8 @@ defmodule Acmex.Resource.OrderTest do
 
   alias Acmex.Resource.Order
 
-  describe "Order.new/2" do
-    test "returns order struct" do
+  describe "new/2" do
+    test "returns an order struct" do
       attrs = %{
         authorizations: [
           "https://localhost:14000/authZ/_6qPZ3Qv9fmwfyvOvu9Y0telWauC77gby35KYmBPvGw"
@@ -16,13 +16,10 @@ defmodule Acmex.Resource.OrderTest do
         status: "ready"
       }
 
-      headers = [{"Location", "http://sample.com"}]
+      url = "http://sample.com"
+      headers = [{"Location", url}]
 
-      order = Order.new(attrs, headers)
-
-      assert order.__struct__ == Order
-      assert order.url == "http://sample.com"
-      assert order.status == attrs.status
+      assert %Order{status: "ready", url: ^url} = Order.new(attrs, headers)
     end
   end
 end
