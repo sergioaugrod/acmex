@@ -8,30 +8,27 @@ defmodule Acmex.Resource.ChallengeTest do
     {:ok, order} = Acmex.new_order(["example-challenge-test.com"])
     authorization = List.first(order.authorizations)
 
-    [
-      http_challenge: Authorization.http(authorization),
-      dns_challenge: Authorization.dns(authorization)
-    ]
+    {:ok,
+     dns_challenge: Authorization.dns(authorization),
+     http_challenge: Authorization.http(authorization)}
   end
 
-  describe "Challenge.new/1" do
-    test "returns challenge struct" do
+  describe "new/1" do
+    test "returns a challenge struct" do
       attrs = %{
         status: "pending",
-        token: "80ec4664-ca5b-11e8-a4c8-02425707000b",
+        token: "80ec4664",
         type: "http-01",
         url: nil
       }
 
-      challenge = Challenge.new(attrs)
-
-      assert challenge.__struct__ == Challenge
-      assert challenge.type == "http-01"
+      assert %Challenge{status: "pending", token: "80ec4664", type: "http-01", url: nil} =
+               Challenge.new(attrs)
     end
   end
 
-  describe "Challenge.get_response/2" do
-    test "returns challenge response when type is http", %{http_challenge: challenge} do
+  describe "get_response/2" do
+    test "when type is HTTP, returns the HTTP challenge response", %{http_challenge: challenge} do
       {:ok, jwk} = Crypto.fetch_jwk_from_key(File.read!("test/support/fixture/account.key"))
 
       {:ok, response} = Challenge.get_response(challenge, jwk)
@@ -41,7 +38,7 @@ defmodule Acmex.Resource.ChallengeTest do
       assert response.filename == ".well-known/acme-challenge/#{challenge.token}"
     end
 
-    test "returns challenge response when type is dns", %{dns_challenge: challenge} do
+    test "when type is DNS, returns the DNS challenge response", %{dns_challenge: challenge} do
       {:ok, jwk} = Crypto.fetch_jwk_from_key(File.read!("test/support/fixture/account.key"))
 
       {:ok, response} = Challenge.get_response(challenge, jwk)
@@ -52,8 +49,8 @@ defmodule Acmex.Resource.ChallengeTest do
     end
   end
 
-  describe "Challenge.get_key_authorization/2" do
-    test "returns challenge key authorization", %{http_challenge: challenge} do
+  describe "get_key_authorization/2" do
+    test "returns the challenge key authorization", %{http_challenge: challenge} do
       {:ok, jwk} = Crypto.fetch_jwk_from_key(File.read!("test/support/fixture/account.key"))
 
       {:ok, authorization} = Challenge.get_key_authorization(challenge, jwk)

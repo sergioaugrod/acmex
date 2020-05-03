@@ -1,8 +1,7 @@
 defmodule Acmex.Support.Order do
   @moduledoc false
 
-  alias Acmex.OpenSSL
-  alias Acmex.Resource.Authorization
+  alias Acmex.{OpenSSL, Resource.Authorization}
 
   def create(_, domains \\ generate_random_domains())
 
@@ -32,9 +31,8 @@ defmodule Acmex.Support.Order do
     %{domains: domains, order: order}
   end
 
-  def generate_random_domains(quantity \\ Enum.random(1..5)) do
-    Enum.map(1..quantity, fn _ -> generate_random_domain() end)
-  end
+  def generate_random_domains(quantity \\ Enum.random(1..5)),
+    do: Enum.map(1..quantity, fn _ -> generate_random_domain() end)
 
   defp generate_random_domain do
     name =

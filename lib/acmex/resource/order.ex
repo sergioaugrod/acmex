@@ -5,15 +5,15 @@ defmodule Acmex.Resource.Order do
 
   alias Acmex.Request
 
-  @enforce_keys [
-    :authorizations,
-    :certificate,
-    :expires,
-    :finalize,
-    :identifiers,
-    :status,
-    :url
-  ]
+  @enforce_keys ~w(
+    authorizations
+    certificate
+    expires
+    finalize
+    identifiers
+    status
+    url
+  )a
 
   defstruct @enforce_keys
 
@@ -27,7 +27,10 @@ defmodule Acmex.Resource.Order do
           url: String.t()
         }
 
-  @spec new(map(), keyword()) :: __MODULE__.t()
+  @doc """
+  Builds an order struct.
+  """
+  @spec new(map(), keyword()) :: t()
   def new(order, headers \\ []) do
     url =
       case Request.get_header(headers, "Location") do

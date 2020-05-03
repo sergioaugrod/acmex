@@ -1,43 +1,42 @@
 defmodule Acmex.RequestTest do
   use ExUnit.Case, async: true
 
-  alias Acmex.{Config, Crypto, Request}
+  alias Acmex.{Config, Request, Support}
   alias Acmex.Resource.Directory
 
   setup_all do
-    [directory: elem(Directory.new(), 1), directory_url: Config.directory_url()]
+    directory = Directory.new() |> elem(1)
+
+    {:ok, directory: directory, directory_url: Config.directory_url()}
   end
 
-  describe "Request.get/3" do
-    test "returns response", %{directory_url: directory_url} do
-      {:ok, response} = Request.get(directory_url, [], nil)
+  describe "get/3" do
+    test "returns the response", %{directory_url: directory_url} do
+      assert {:ok, response} = Request.get(directory_url, [], nil)
 
       assert is_binary(response.body)
     end
 
-    test "returns response with encoded body", %{
-      directory: directory,
+    test "returns the response with encoded body", %{
+      directory: %{new_account: new_account},
       directory_url: directory_url
     } do
-      {:ok, response} = Request.get(directory_url, [])
-
-      assert response.body.newAccount == directory.new_account
+      assert {:ok, %{body: %{newAccount: ^new_account}}} = Request.get(directory_url, [])
     end
   end
 
-  describe "Request.post/5" do
-    setup %{directory: directory} do
+  describe "post/5" do
+    setup %{directory: %{new_nonce: new_nonce}} do
       get_nonce = fn ->
-        {:ok, response} = Request.head(directory.new_nonce)
+        {:ok, response} = Request.head(new_nonce)
+
         Request.get_header(response.headers, "Replay-Nonce")
       end
 
-      {:ok, jwk} = Crypto.fetch_jwk_from_key(File.read!("test/support/fixture/account.key"))
-
-      [directory: directory, jwk: jwk, get_nonce: get_nonce]
+      {:ok, get_nonce: get_nonce, jwk: Support.Account.jwk()}
     end
 
-    test "returns response", %{directory: directory, jwk: jwk, get_nonce: get_nonce} do
+    test "returns the response", %{directory: directory, get_nonce: get_nonce, jwk: jwk} do
       payload = %{contact: ["mailto:info@example.com"], termsOfServiceAgreed: true}
 
       post = fn post, directory_new_account, jwk, payload, nonce ->
@@ -53,32 +52,30 @@ defmodule Acmex.RequestTest do
 
       nonce = get_nonce.()
 
-      {:ok, response} = post.(post, directory.new_account, jwk, payload, nonce)
+      assert {:ok, %{body: %{status: "valid"}, headers: headers, status_code: 200}} =
+               post.(post, directory.new_account, jwk, payload, nonce)
 
-      assert response.status_code == 200
-      assert response.body.status == "valid"
-      assert Request.get_header(response.headers, "Location")
+      assert Request.get_header(headers, "Location")
     end
   end
 
-  describe "Request.post_as_get/5" do
+  describe "post_as_get/5" do
     setup %{directory: directory} do
       get_nonce = fn ->
         {:ok, response} = Request.head(directory.new_nonce)
         Request.get_header(response.headers, "Replay-Nonce")
       end
 
-      {:ok, jwk} = Crypto.fetch_jwk_from_key(File.read!("test/support/fixture/account.key"))
       {:ok, %{url: kid}} = Acmex.get_account()
       {:ok, order} = Acmex.new_order(["example1.com"])
 
-      [order: order, jwk: jwk, get_nonce: get_nonce, kid: kid]
+      {:ok, get_nonce: get_nonce, jwk: Support.Account.jwk(), kid: kid, order: order}
     end
 
-    test "returns response", %{order: order, jwk: jwk, get_nonce: get_nonce, kid: kid} do
+    test "returns the response", %{get_nonce: get_nonce, jwk: jwk, kid: kid, order: order} do
       post_as_get = fn post_as_get, order_url, jwk, nonce, kid ->
         case Request.post_as_get(order_url, jwk, nonce, kid) do
-          {:ok, _} = result ->
+          {:ok, _response} = result ->
             result
 
           {:error, _response} ->
@@ -89,25 +86,21 @@ defmodule Acmex.RequestTest do
 
       nonce = get_nonce.()
 
-      {:ok, response} = post_as_get.(post_as_get, order.url, jwk, nonce, kid)
-
-      assert response.status_code == 200
-      assert response.body.status == "pending"
+      assert {:ok, %{body: %{status: "pending"}, status_code: 200}} =
+               post_as_get.(post_as_get, order.url, jwk, nonce, kid)
     end
   end
 
-  describe "Request.head/1" do
-    test "returns nonce response", %{directory: directory} do
-      {:ok, response} = Request.head(directory.new_nonce)
+  describe "head/1" do
+    test "returns a nonce response", %{directory: %{new_nonce: new_nonce}} do
+      assert {:ok, %{body: "", status_code: 200, headers: headers}} = Request.head(new_nonce)
 
-      assert response.body == ""
-      assert response.status_code == 200
-      assert Request.get_header(response.headers, "Replay-Nonce")
+      assert Request.get_header(headers, "Replay-Nonce")
     end
   end
 
-  describe "Request.get_header/2" do
-    test "returns value of header" do
+  describe "get_header/2" do
+    test "returns the value of header" do
       headers = [
         {"Foo", "Bar"},
         {"X-Request-ID", "1234abc"}

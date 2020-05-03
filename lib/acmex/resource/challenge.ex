@@ -5,7 +5,7 @@ defmodule Acmex.Resource.Challenge do
 
   alias JOSE.JWK
 
-  @enforce_keys [:status, :token, :type, :url]
+  @enforce_keys ~w(status token type url)a
 
   defstruct @enforce_keys
 
@@ -22,10 +22,16 @@ defmodule Acmex.Resource.Challenge do
 
   @type t :: %__MODULE__{status: String.t(), token: String.t(), type: String.t(), url: String.t()}
 
-  @spec new(map()) :: __MODULE__.t()
+  @doc """
+  Builds a challenge struct.
+  """
+  @spec new(map()) :: t()
   def new(challenge), do: struct(__MODULE__, challenge)
 
-  @spec get_response(__MODULE__.t(), map()) :: {:ok, dns_response()} | {:ok, http_response()}
+  @doc """
+  Gets the response from a challenge.
+  """
+  @spec get_response(t(), tuple()) :: {:ok, dns_response()} | {:ok, http_response()}
   def get_response(%__MODULE__{type: "dns-01"} = challenge, jwk) do
     {:ok, key_authorization} = get_key_authorization(challenge, jwk)
 
@@ -53,6 +59,10 @@ defmodule Acmex.Resource.Challenge do
      }}
   end
 
+  @doc """
+  Gets the key authorization from a challenge and JWK.
+  """
+  @spec get_key_authorization(t(), tuple()) :: {:ok, String.t()}
   def get_key_authorization(%__MODULE__{token: token}, jwk),
     do: {:ok, "#{token}.#{JWK.thumbprint(jwk)}"}
 end

@@ -51,7 +51,7 @@ defmodule Acmex do
         Client.start_link(key, name)
 
       true ->
-        {:error, "invalid key or keyfile does not exist"}
+        {:error, "empty key or keyfile does not exist"}
     end
   end
 
