@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add optional process timeout parameter to `Acmex` functions.
 
+### Changed
+- Update `httpoison` to `1.7`.
+- Update `jason` to `1.2.1`.
+
 ## [0.1.2] - 2020-05-03
 ### Changed
 - Improve the documentation.
