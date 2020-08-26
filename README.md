@@ -60,29 +60,36 @@ children = [
 #### Creating a new account
 
 The second parameter is about the agreement of the terms of service.
+The third parameter is optional and represents the function timeout, once it runs as an async process. The default value is "5_000" ms.
 
 ```elixir
-Acmex.new_account(["mailto:info@example.com"], true)
+Acmex.new_account(["mailto:info@example.com"], true, \\ 5_000)
 ```
 
 #### Fetch existing account
+It accepts an opttional parameter which represents the function timeout, once it runs as an async process. The default value is "5_000" ms.
 
 ```elixir
-Acmex.get_account()
+Acmex.get_account( \\ 5_000)
 ```
 
 ### Order
 
 #### Creating a new order
 
+It accepts an optional second parameter which represents the function timeout, once it runs as an async process. The default value is "5_000" ms.
+
+
 ```elixir
-Acmex.new_order(["example.com"])
+Acmex.new_order(["example.com"], \\ 5_000)
 ```
 
 #### Fetch an existing order
 
+It accepts an optional second parameter which represents the function timeout, once it runs as an async process. The default value is "5_000" ms.
+
 ```elixir
-Acmex.get_order(order.url)
+Acmex.get_order(order.url, \\ 5_000)
 ```
 
 ### Challenge
@@ -96,43 +103,56 @@ challenge = Acmex.Resource.Authorization.http(authorization)
 
 #### Return a challenge response
 
+It accepts an optional second parameter which represents the function timeout, once it runs as an async process. The default value is "5_000" ms.
+
 ```elixir
-Acmex.get_challenge_response(challenge)
+Acmex.get_challenge_response(challenge, \\ 5_000)
 ```
 
 #### Validate the challenge
 
+It accepts an optional second parameter which represents the function timeout, once it runs as an async process. The default value is "5_000" ms.
+
 ```elixir
-{:ok, challenge} = Acmex.validate_challenge(challenge)
+{:ok, challenge} = Acmex.validate_challenge(challenge, \\ 5_000)
 ```
 
 #### Fetch an existing challenge
 
+It accepts an optional second parameter which represents the function timeout, once it runs as an async process. The default value is "5_000" ms.
+
 ```elixir
-Acmex.get_challenge(challenge.url)
+Acmex.get_challenge(challenge.url, \\ 5_000)
 ```
 
 ### Certificate
 
 #### Finalize an order
 
+It accepts an optional third parameter which represents the function timeout, once it runs as an async process. The default value is "5_000" ms.
+
+
 ```elixir
 order_key = Acmex.OpenSSL.generate_key(:rsa)
 {:ok, csr} = Acmex.OpenSSL.generate_csr(order_key, ["example.com"])
-{:ok, order} = Acmex.finalize_order(order, csr)
+{:ok, order} = Acmex.finalize_order(order, csr, \\ 5_000)
 ```
 
 #### Get the certificate
 
+It accepts an optional second parameter which represents the function timeout, once it runs as an async process. The default value is "5_000" ms.
+
 ```elixir
-Acmex.get_certificate(order)
+Acmex.get_certificate(order, \\ 5_000)
 ```
 
 #### Revoke a certificate
 
+It accepts an optional third parameter which represents the function timeout, once it runs as an async process. The default value is "5_000" ms.
+
 ```elixir
 {:ok, certificate} = Acmex.get_certificate(order)
-Acmex.revoke_certificate(certificate, 0)
+Acmex.revoke_certificate(certificate, 0, \\ 5_000)
 ```
 
 ## Documentation
