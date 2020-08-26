@@ -70,8 +70,8 @@ defmodule Acmex do
 
   """
   @spec new_account([String.t()], boolean()) :: account_reply()
-  def new_account(contact, tos),
-    do: GenServer.call(Client, {:new_account, contact, tos}, genserver_timeout())
+  def new_account(contact, tos, timeout \\ 5_000),
+    do: GenServer.call(Client, {:new_account, contact, tos}, timeout)
 
   @doc """
   Gets an existing account.
@@ -85,7 +85,7 @@ defmodule Acmex do
 
   """
   @spec get_account() :: account_reply()
-  def get_account, do: GenServer.call(Client, :get_account, genserver_timeout())
+  def get_account(timeout \\ 5_000), do: GenServer.call(Client, :get_account, timeout)
 
   @doc """
   Creates a new order.
@@ -100,8 +100,8 @@ defmodule Acmex do
 
   """
   @spec new_order([String.t()]) :: order_reply()
-  def new_order(identifiers),
-    do: GenServer.call(Client, {:new_order, identifiers}, genserver_timeout())
+  def new_order(identifiers, timeout \\ 5_000),
+    do: GenServer.call(Client, {:new_order, identifiers}, timeout)
 
   @doc """
   Gets an existing order.
@@ -117,7 +117,7 @@ defmodule Acmex do
 
   """
   @spec get_order(String.t()) :: order_reply()
-  def get_order(url), do: GenServer.call(Client, {:get_order, url}, genserver_timeout())
+  def get_order(url, timeout \\ 5_000), do: GenServer.call(Client, {:get_order, url}, timeout)
 
   @doc """
   Gets an existing challenge.
@@ -133,7 +133,7 @@ defmodule Acmex do
 
   """
   @spec get_challenge(String.t()) :: challenge_reply()
-  def get_challenge(url), do: GenServer.call(Client, {:get_challenge, url}, genserver_timeout())
+  def get_challenge(url, timeout \\ 5_000), do: GenServer.call(Client, {:get_challenge, url}, timeout)
 
   @doc """
   Gets the challenge response.
@@ -162,8 +162,8 @@ defmodule Acmex do
 
   """
   @spec get_challenge_response(Challenge.t()) :: {:ok, map()}
-  def get_challenge_response(challenge),
-    do: GenServer.call(Client, {:get_challenge_response, challenge}, genserver_timeout())
+  def get_challenge_response(challenge, timeout \\ 5_000),
+    do: GenServer.call(Client, {:get_challenge_response, challenge}, timeout)
 
   @doc """
   Validates the challenge.
@@ -179,8 +179,8 @@ defmodule Acmex do
 
   """
   @spec validate_challenge(Challenge.t()) :: challenge_reply()
-  def validate_challenge(challenge),
-    do: GenServer.call(Client, {:validate_challenge, challenge}, genserver_timeout())
+  def validate_challenge(challenge, timeout \\ 5_000),
+    do: GenServer.call(Client, {:validate_challenge, challenge}, timeout)
 
   @doc """
   Finalizes the order.
@@ -196,8 +196,8 @@ defmodule Acmex do
 
   """
   @spec finalize_order(Order.t(), String.t()) :: challenge_reply()
-  def finalize_order(order, csr),
-    do: GenServer.call(Client, {:finalize_order, order, csr}, genserver_timeout())
+  def finalize_order(order, csr, timeout \\ 5_000),
+    do: GenServer.call(Client, {:finalize_order, order, csr}, timeout)
 
   @doc """
   Gets the certificate.
@@ -215,8 +215,8 @@ defmodule Acmex do
 
   """
   @spec get_certificate(Order.t()) :: certificate_reply()
-  def get_certificate(order),
-    do: GenServer.call(Client, {:get_certificate, order}, genserver_timeout())
+  def get_certificate(order, timeout \\ 5_000),
+    do: GenServer.call(Client, {:get_certificate, order}, timeout)
 
   @doc """
   Revokes a certificate.
@@ -233,8 +233,8 @@ defmodule Acmex do
 
   """
   @spec revoke_certificate(String.t(), integer()) :: certificate_revocation_reply()
-  def revoke_certificate(certificate, reason_code \\ 0) do
-    GenServer.call(Client, {:revoke_certificate, certificate, reason_code}, genserver_timeout())
+  def revoke_certificate(certificate, reason_code \\ 0, timeout \\ 5_000) do
+    GenServer.call(Client, {:revoke_certificate, certificate, reason_code}, timeout)
   end
 
   @spec child_spec(list()) :: Supervisor.child_spec()
@@ -245,6 +245,4 @@ defmodule Acmex do
       start: {__MODULE__, :start_link, args}
     }
   end
-
-  defp genserver_timeout, do: Application.get_env(:acmex, :genserver_timeout, 5_000)
 end

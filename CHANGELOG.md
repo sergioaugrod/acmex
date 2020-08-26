@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Add custom timeout param to functions which use `GenServer.call` in Acmex Module
+
 ## [0.1.2] - 2020-05-03
 ### Changed
 - Improve the documentation.
