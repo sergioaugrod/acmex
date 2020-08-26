@@ -133,7 +133,8 @@ defmodule Acmex do
 
   """
   @spec get_challenge(String.t()) :: challenge_reply()
-  def get_challenge(url, timeout \\ 5_000), do: GenServer.call(Client, {:get_challenge, url}, timeout)
+  def get_challenge(url, timeout \\ 5_000),
+    do: GenServer.call(Client, {:get_challenge, url}, timeout)
 
   @doc """
   Gets the challenge response.
