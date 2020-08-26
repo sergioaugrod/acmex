@@ -62,6 +62,7 @@ defmodule Acmex do
 
     - contact: A list of URLs that the ACME can use to contact the client for issues related to this account.
     - tos: Terms Of Service Agreed indicates the client's agreement with the terms of service.
+    - timeout: Async process timeout in miliseconds. Default: 5_000
 
   ## Examples
 
@@ -69,7 +70,7 @@ defmodule Acmex do
       {:ok, %Account{...}}
 
   """
-  @spec new_account([String.t()], boolean()) :: account_reply()
+  @spec new_account([String.t()], boolean(), integer()) :: account_reply()
   def new_account(contact, tos, timeout \\ 5_000),
     do: GenServer.call(Client, {:new_account, contact, tos}, timeout)
 
@@ -78,13 +79,16 @@ defmodule Acmex do
 
   An account will only be returned if the current private key has been used to create a new account.
 
+  ## Parameters
+    - timeout: Async process timeout in miliseconds. Default: 5_000
+
   ## Examples
 
       iex> Acmex.get_account()
       {:ok, %Account{...}}
 
   """
-  @spec get_account() :: account_reply()
+  @spec get_account(integer()) :: account_reply()
   def get_account(timeout \\ 5_000), do: GenServer.call(Client, :get_account, timeout)
 
   @doc """
@@ -92,6 +96,7 @@ defmodule Acmex do
 
   ## Parameters
     - identifiers: A list of domains.
+    - timeout: Async process timeout in miliseconds. Default: 5_000
 
   ## Examples
 
@@ -99,7 +104,7 @@ defmodule Acmex do
       {:ok, %Order{...}}
 
   """
-  @spec new_order([String.t()]) :: order_reply()
+  @spec new_order([String.t()], integer()) :: order_reply()
   def new_order(identifiers, timeout \\ 5_000),
     do: GenServer.call(Client, {:new_order, identifiers}, timeout)
 
@@ -109,6 +114,7 @@ defmodule Acmex do
   ## Parameters
 
     - url: The url attribute of the order resource.
+    - timeout: Async process timeout in miliseconds. Default: 5_000
 
   ## Examples
 
@@ -116,7 +122,7 @@ defmodule Acmex do
       {:ok, %Order{...}}
 
   """
-  @spec get_order(String.t()) :: order_reply()
+  @spec get_order(String.t(), integer()) :: order_reply()
   def get_order(url, timeout \\ 5_000), do: GenServer.call(Client, {:get_order, url}, timeout)
 
   @doc """
@@ -125,6 +131,7 @@ defmodule Acmex do
   ## Parameters
 
   - url: The url attribute of the challenge resource.
+  - timeout: Async process timeout in miliseconds. Default: 5_000
 
   ## Examples
 
@@ -132,7 +139,7 @@ defmodule Acmex do
       {:ok, %Challenge{...}}
 
   """
-  @spec get_challenge(String.t()) :: challenge_reply()
+  @spec get_challenge(String.t(), integer()) :: challenge_reply()
   def get_challenge(url, timeout \\ 5_000),
     do: GenServer.call(Client, {:get_challenge, url}, timeout)
 
@@ -142,6 +149,7 @@ defmodule Acmex do
   ## Parameters
 
     - challenge: The challenge resource.
+    - timeout: Async process timeout in miliseconds. Default: 5_000
 
   ## Examples
 
@@ -162,7 +170,7 @@ defmodule Acmex do
          }}
 
   """
-  @spec get_challenge_response(Challenge.t()) :: {:ok, map()}
+  @spec get_challenge_response(Challenge.t(), integer()) :: {:ok, map()}
   def get_challenge_response(challenge, timeout \\ 5_000),
     do: GenServer.call(Client, {:get_challenge_response, challenge}, timeout)
 
@@ -172,6 +180,7 @@ defmodule Acmex do
   ## Parameters
 
     - challenge: The challenge resource.
+    - timeout: Async process timeout in miliseconds. Default: 5_000
 
   ## Examples
 
@@ -179,7 +188,7 @@ defmodule Acmex do
       {:ok, %Challenge{...}}
 
   """
-  @spec validate_challenge(Challenge.t()) :: challenge_reply()
+  @spec validate_challenge(Challenge.t(), integer()) :: challenge_reply()
   def validate_challenge(challenge, timeout \\ 5_000),
     do: GenServer.call(Client, {:validate_challenge, challenge}, timeout)
 
@@ -189,6 +198,7 @@ defmodule Acmex do
   ## Parameters
 
     - order: The order resource with status "pending".
+    - timeout: Async process timeout in miliseconds. Default: 5_000
 
   ## Examples
 
@@ -196,7 +206,7 @@ defmodule Acmex do
       {:ok, %Order{status: "processing"}}
 
   """
-  @spec finalize_order(Order.t(), String.t()) :: challenge_reply()
+  @spec finalize_order(Order.t(), String.t(), integer()) :: challenge_reply()
   def finalize_order(order, csr, timeout \\ 5_000),
     do: GenServer.call(Client, {:finalize_order, order, csr}, timeout)
 
@@ -208,6 +218,7 @@ defmodule Acmex do
   ## Parameters
 
     - order: The order resource with status "valid".
+    - timeout: Async process timeout in miliseconds. Default: 5_000
 
   ## Examples
 
@@ -215,7 +226,7 @@ defmodule Acmex do
       {:ok, "-----BEGIN CERTIFICATE-----..."}
 
   """
-  @spec get_certificate(Order.t()) :: certificate_reply()
+  @spec get_certificate(Order.t(), integer()) :: certificate_reply()
   def get_certificate(order, timeout \\ 5_000),
     do: GenServer.call(Client, {:get_certificate, order}, timeout)
 
@@ -226,6 +237,7 @@ defmodule Acmex do
 
     - certificate: The certificate to be revoked.
     - reason: Optional revocation reason code.
+    - timeout: Async process timeout in miliseconds. Default: 5_000
 
   ## Examples
 
@@ -233,7 +245,7 @@ defmodule Acmex do
       :ok
 
   """
-  @spec revoke_certificate(String.t(), integer()) :: certificate_revocation_reply()
+  @spec revoke_certificate(String.t(), integer(), integer()) :: certificate_revocation_reply()
   def revoke_certificate(certificate, reason_code \\ 0, timeout \\ 5_000) do
     GenServer.call(Client, {:revoke_certificate, certificate, reason_code}, timeout)
   end
