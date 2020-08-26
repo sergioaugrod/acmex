@@ -135,6 +135,10 @@ Acmex.get_certificate(order)
 Acmex.revoke_certificate(certificate, 0)
 ```
 
+#### Timeout
+
+All the `Acmex` functions accept an optional parameter to set the process timeout. The default value is `5000ms`.
+
 ## Documentation
 
 The full documentation can be found at https://hexdocs.pm/acmex.
