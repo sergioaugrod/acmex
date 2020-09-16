@@ -3,7 +3,15 @@
 ![](https://github.com/sergioaugrod/acmex/workflows/CI/badge.svg)
 [![Hex.pm](https://img.shields.io/hexpm/v/acmex.svg)](https://hex.pm/packages/acmex)
 
-Acmex is an Elixir Client for the Lets Encrypt [ACMEv2](https://github.com/ietf-wg-acme/acme) protocol.
+**This project is no longer maintained.**
+
+Acmex is an Elixir Client for the Lets Encrypt ACMEv2 protocol.
+
+## Status
+
+* Acmex is not used in production and have a very incomplete support to ACMEv2 protocol.
+* It does not have a good flexibility, because it uses a `GenServer` to keep the account state and
+  application config to get the directory URL.
 
 ## Installation
 
@@ -12,7 +20,7 @@ The package can be installed by adding `acmex` to your list of dependencies in `
 ```elixir
 def deps do
   [
-    {:acmex, "~> 0.1.2"}
+    {:acmex, "~> 0.2.0"}
   ]
 end
 ```
@@ -34,17 +42,8 @@ If you need a staging version of `Lets Encrypt ACMEv2` set the `directory_url` a
 
 #### Starting the client
 
-You need to generate a private key to start the client. Acmex actually expects a RSA Key.
-If you don't have it, you can create one through Acmex:
-
 ```elixir
-key = Acmex.OpenSSL.generate_key(:rsa)
-```
-
-And now start the client with the generated key:
-
-```elixir
-Acmex.start_link(key: key)
+Acmex.start_link(key: account_rsa_key)
 ```
 
 To use on your supervisor:
